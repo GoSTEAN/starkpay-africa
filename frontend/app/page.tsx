@@ -48,7 +48,7 @@ export default function Home() {
       <div className="flex flex-col gap-50">
 
       <HeroSection />
-      <Features />
+      {/* <Features /> */}
       <Values />
       <WhyStarkpay />
       <Faq />
