@@ -1,369 +1,377 @@
 import { useContract } from "@starknet-react/core";
 import { Abi } from "starknet";
 
-export const STARKPAY_ABI: Abi = [
+export const STARKPAY_ABI: Abi =[
   {
-    name: "StarkpayImpl",
-    type: "impl",
-    interface_name: "starkpay_africa::interface::IStarkpay::IStarkpay",
+    "type": "impl",
+    "name": "StarkpayImpl",
+    "interface_name": "starkpay_africa::interface::IStarkpay::IStarkpay"
   },
   {
-    name: "core::integer::u256",
-    type: "struct",
-    members: [
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
       {
-        name: "low",
-        type: "core::integer::u128",
+        "name": "low",
+        "type": "core::integer::u128"
       },
       {
-        name: "high",
-        type: "core::integer::u128",
-      },
-    ],
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
   },
   {
-    name: "starkpay_africa::types::data::Role",
-    type: "enum",
-    variants: [
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
       {
-        name: "None",
-        type: "()",
+        "name": "False",
+        "type": "()"
       },
       {
-        name: "Merchant",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "Admin",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "User",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-    ],
+        "name": "True",
+        "type": "()"
+      }
+    ]
   },
   {
-    name: "starkpay_africa::interface::IStarkpay::IStarkpay",
-    type: "interface",
-    items: [
+    "type": "interface",
+    "name": "starkpay_africa::interface::IStarkpay::IStarkpay",
+    "items": [
       {
-        name: "create_payment",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "create_payment",
+        "inputs": [
           {
-            name: "receiver",
-            type: "core::starknet::contract_address::ContractAddress",
+            "name": "receiver",
+            "type": "core::starknet::contract_address::ContractAddress"
           },
           {
-            name: "amount",
-            type: "core::integer::u256",
+            "name": "amount",
+            "type": "core::integer::u256"
           },
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
+            "name": "token",
+            "type": "core::starknet::contract_address::ContractAddress"
           },
           {
-            name: "remarks",
-            type: "core::felt252",
-          },
+            "name": "remarks",
+            "type": "core::felt252"
+          }
         ],
-        outputs: [
+        "outputs": [
           {
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        state_mutability: "external",
+        "state_mutability": "external"
       },
       {
-        name: "receive_payment",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "receive_payment",
+        "inputs": [
           {
-            name: "request_id",
-            type: "core::integer::u256",
-          },
+            "name": "request_id",
+            "type": "core::integer::u256"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        name: "deposit",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "deposit",
+        "inputs": [
           {
-            name: "amount",
-            type: "core::integer::u256",
+            "name": "amount",
+            "type": "core::integer::u256"
           },
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "name": "token",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        name: "withdrawal",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "withdrawal",
+        "inputs": [
           {
-            name: "amount",
-            type: "core::integer::u256",
+            "name": "amount",
+            "type": "core::integer::u256"
           },
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "name": "token",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        name: "get_balance",
-        type: "function",
-        inputs: [],
-        outputs: [
+        "type": "function",
+        "name": "get_balance",
+        "inputs": [],
+        "outputs": [
           {
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        state_mutability: "external",
+        "state_mutability": "external"
       },
       {
-        name: "create_sme",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "create_sme",
+        "inputs": [
           {
-            name: "recipients",
-            type: "core::array::Array::<(core::starknet::contract_address::ContractAddress, core::integer::u8)>",
-          },
+            "name": "recipients",
+            "type": "core::array::Array::<(core::starknet::contract_address::ContractAddress, core::integer::u8)>"
+          }
         ],
-        outputs: [
+        "outputs": [
           {
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        state_mutability: "external",
+        "state_mutability": "external"
       },
       {
-        name: "process_split",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "process_split",
+        "inputs": [
           {
-            name: "sme_id",
-            type: "core::integer::u256",
+            "name": "sme_id",
+            "type": "core::integer::u256"
           },
           {
-            name: "amount",
-            type: "core::integer::u256",
+            "name": "amount",
+            "type": "core::integer::u256"
           },
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "name": "token",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        name: "register",
-        type: "function",
-        inputs: [
+        "type": "function",
+        "name": "register",
+        "inputs": [
           {
-            name: "role",
-            type: "starkpay_africa::types::data::Role",
-          },
+            "name": "is_merchant",
+            "type": "core::bool"
+          }
         ],
-        outputs: [
+        "outputs": [
           {
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        state_mutability: "external",
+        "state_mutability": "external"
       },
-    ],
+      {
+        "type": "function",
+        "name": "get_user_role",
+        "inputs": [
+          {
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u8"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
   },
   {
-    name: "constructor",
-    type: "constructor",
-    inputs: [
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
       {
-        name: "usdc",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "usdc",
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        name: "usdt",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "usdt",
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        name: "strk",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-    ],
+        "name": "strk",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
   },
   {
-    kind: "struct",
-    name: "starkpay_africa::starkpay::Starkpay::PaymentRequestCreated",
-    type: "event",
-    members: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::PaymentRequestCreated",
+    "kind": "struct",
+    "members": [
       {
-        kind: "data",
-        name: "request_id",
-        type: "core::integer::u256",
+        "name": "request_id",
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "merchant",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "merchant",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "receiver",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "receiver",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "amount",
-        type: "core::integer::u256",
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "token",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "token",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "remarks",
-        type: "core::felt252",
+        "name": "remarks",
+        "type": "core::felt252",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "ngn_equivalent",
-        type: "core::integer::u256",
-      },
-    ],
+        "name": "ngn_equivalent",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
   },
   {
-    kind: "struct",
-    name: "starkpay_africa::starkpay::Starkpay::DepositEvent",
-    type: "event",
-    members: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::DepositEvent",
+    "kind": "struct",
+    "members": [
       {
-        kind: "data",
-        name: "caller",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "caller",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "amount",
-        type: "core::integer::u256",
-      },
-    ],
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
   },
   {
-    kind: "struct",
-    name: "starkpay_africa::starkpay::Starkpay::SmeCreated",
-    type: "event",
-    members: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::SmeCreated",
+    "kind": "struct",
+    "members": [
       {
-        kind: "data",
-        name: "sme_id",
-        type: "core::integer::u256",
+        "name": "sme_id",
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "merchant",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "merchant",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "recipients",
-        type: "core::array::Array::<(core::starknet::contract_address::ContractAddress, core::integer::u8)>",
-      },
-    ],
+        "name": "recipients",
+        "type": "core::array::Array::<(core::starknet::contract_address::ContractAddress, core::integer::u8)>",
+        "kind": "data"
+      }
+    ]
   },
   {
-    kind: "struct",
-    name: "starkpay_africa::starkpay::Starkpay::SplitProcessed",
-    type: "event",
-    members: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::SplitProcessed",
+    "kind": "struct",
+    "members": [
       {
-        kind: "data",
-        name: "sme_id",
-        type: "core::integer::u256",
+        "name": "sme_id",
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "merchant",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "merchant",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "token",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "token",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "total_amount",
-        type: "core::integer::u256",
-      },
-    ],
+        "name": "total_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
   },
   {
-    kind: "struct",
-    name: "starkpay_africa::starkpay::Starkpay::PaymentReceived",
-    type: "event",
-    members: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::PaymentReceived",
+    "kind": "struct",
+    "members": [
       {
-        kind: "data",
-        name: "request_id",
-        type: "core::integer::u256",
+        "name": "request_id",
+        "type": "core::integer::u256",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "payer",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "payer",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       },
       {
-        kind: "data",
-        name: "amount",
-        type: "core::integer::u256",
-      },
-    ],
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
   },
   {
-    kind: "enum",
-    name: "starkpay_africa::starkpay::Starkpay::Event",
-    type: "event",
-    variants: [
+    "type": "event",
+    "name": "starkpay_africa::starkpay::Starkpay::Event",
+    "kind": "enum",
+    "variants": [
       {
-        kind: "nested",
-        name: "PaymentRequestCreated",
-        type: "starkpay_africa::starkpay::Starkpay::PaymentRequestCreated",
+        "name": "PaymentRequestCreated",
+        "type": "starkpay_africa::starkpay::Starkpay::PaymentRequestCreated",
+        "kind": "nested"
       },
       {
-        kind: "nested",
-        name: "DepositEvent",
-        type: "starkpay_africa::starkpay::Starkpay::DepositEvent",
+        "name": "DepositEvent",
+        "type": "starkpay_africa::starkpay::Starkpay::DepositEvent",
+        "kind": "nested"
       },
       {
-        kind: "nested",
-        name: "SmeCreated",
-        type: "starkpay_africa::starkpay::Starkpay::SmeCreated",
+        "name": "SmeCreated",
+        "type": "starkpay_africa::starkpay::Starkpay::SmeCreated",
+        "kind": "nested"
       },
       {
-        kind: "nested",
-        name: "SplitProcessed",
-        type: "starkpay_africa::starkpay::Starkpay::SplitProcessed",
+        "name": "SplitProcessed",
+        "type": "starkpay_africa::starkpay::Starkpay::SplitProcessed",
+        "kind": "nested"
       },
       {
-        kind: "nested",
-        name: "PaymentReceived",
-        type: "starkpay_africa::starkpay::Starkpay::PaymentReceived",
-      },
-    ],
-  },
+        "name": "PaymentReceived",
+        "type": "starkpay_africa::starkpay::Starkpay::PaymentReceived",
+        "kind": "nested"
+      }
+    ]
+  }
 ] as const;
 
 export const STARKPAY_CONTRACT_ADDRESS = "0x05d5a32802a2260e9ac978fb2eb33f8295dea0aaeed9ab512378df96081aa5b5"; 

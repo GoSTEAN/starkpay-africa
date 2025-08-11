@@ -14,16 +14,17 @@ export default function HeroSection() {
             Nigerian businesses. Accept crypto payments effortlessly and
             withdraw in naira with ease
           </p>
-         <WalletConnectorModal />
+          <WalletConnectorModal />
         </div>
-        <div className="w-auto">
+        <div className="w-full border border-white h-full">
+          <div className="w-full border border-white h-[650px] relative">
             <Image
-                src="/design.svg"
-                alt="Hero Section Image"
-                width={450}
-                height={450}
-                className="w-full h-auto"
+              src="/design.svg"
+              alt="Hero Section Image"
+              fill
+              className="w-full h-auto border-5 border-red-500"
             />
+          </div>
         </div>
       </div>
     </div>

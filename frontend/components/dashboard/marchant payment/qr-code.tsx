@@ -20,12 +20,9 @@ export default function QrCodComponent({
 }: Qrcodeprops) {
   return (
     <div
-      className={`" rounded-[19px] relative z-10  py-[66px] gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px]  bg-transparent w-full h-full border border-[#FBFBFB1F]"`}
+      className={`" rounded-[19px] relative z-10  py-[46px] gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px]  bg-[#212324] w-full h-full "`}
     >
       <div className="flex flex-col gap-[22px]">
-        <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
-          Generate Payment QR Code
-        </h1>
         <p className="text-[#FBFBFB] text-[20px] font-[400]">
           Accepting USDC, USDT,or STRK payments from customers using QR codes
         </p>

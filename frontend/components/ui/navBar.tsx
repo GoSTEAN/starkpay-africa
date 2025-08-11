@@ -8,6 +8,7 @@ import Image from "next/image";
 import SearchBar from "./search";
 import Profile from "./profile";
 import { Notifications } from "./notification";
+import { useAccount } from "@starknet-react/core";
 
 export default function NavBar() {
   const [toggle, setToggle] = React.useState(false);
@@ -20,7 +21,8 @@ export default function NavBar() {
     { name: "Contact", href: "/contact" },
   ];
 
-  const isLogedin = true;
+  const { address: isLogedin  } = useAccount();
+  
 
   const handleToggle = () => {
     setToggle(!toggle);
@@ -64,19 +66,16 @@ export default function NavBar() {
       } items-center h-[88px] lg:gap-[20px] xl:gap-[50px] flex text-white`}
     >
       <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
-      <div className="text-[24px] relative z-10 flex font-[500] text-white">
-        {isLogedin ? "Marchant payment" : "StarkPay"}
+      <div className="text-[24px] relative z-10 flex   font-[500] text-white">
+        {isLogedin ? "Dashboard" : "StarkPay"}
       </div>
       
       {isLogedin ? (
-        <div className="hidden md:flex gap-[8] items-center">
+        <div className="hidden lg:flex gap-[8] items-center w-full justify-end">
           <SearchBar
             placeholder="Search transaction ID..."
             func={handleSearch}
           />
-          <Profile />
-          
-          {/* Notification Component */}
           <Notifications
             notifications={notifications}
             onMarkAsRead={markNotificationAsRead}
@@ -84,17 +83,20 @@ export default function NavBar() {
             onRemove={removeNotification}
             onClearAll={clearAllNotifications}
           />
+          <Profile />
+          
+          {/* Notification Component */}
         </div>
       ) : (
         <div
-          className={`w-fit hidden md:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] border-white`}
+          className={`w-fit hidden md:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] mx-auto border-white`}
         >
           <div className="absolute inset-0 rounded-[30px] bg-white/10 backdrop-blur-lg pointer-events-none" />
           {navItems.map((item, index) => (
             <Link
               href={item.href}
               key={index}
-              className="text-[16px] relative z-10 font-[400] hover:bg-white/20 font-[Montserrat] px-4 flex flex-none"
+              className="text-[20px] relative z-10 font-[500] hover:bg-white/20 font-[Montserrat] px-4 flex flex-none"
             >
               {item.name}
             </Link>
@@ -102,13 +104,8 @@ export default function NavBar() {
         </div>
       )}
       
-      <div className="flex w-fit gap-8 items-center pr-3">
-        <div className="hidden md:flex">
-          <WalletConnectorModal />
-        </div>
-
-        {/* Mobile Notification Button */}
-        <div className="md:hidden">
+      <div className="z-10 flex gap-5 items-center">
+        <div className="lg:hidden flex items-center justify-center">
           <button 
             className="relative"
             onClick={() => setToggle(!toggle)}
@@ -123,11 +120,20 @@ export default function NavBar() {
         </div>
 
         <button
-          className={`z-[99] ${toggle ? "hidden" : "flex"} md:hidden`}
+          className={`z-[99] ${toggle ? "hidden" : "flex"} lg:hidden`}
           onClick={handleToggle}
         >
           <Menu color="white" size={30} />
         </button>
+
+        
+      </div>
+      <div className={`flex w-fit gap-8 items-center pr-3 ${isLogedin?  "hidden" : "flex"}`}>
+        <div className={` hidden md:flex`}>
+          <WalletConnectorModal />
+        </div>
+
+        {/* Mobile Notification Button */}
       </div>
 
       {/* Mobile Menu */}

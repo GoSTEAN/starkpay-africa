@@ -25,8 +25,8 @@ export default function Home() {
               y2="0"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="20%" stopColor="rgba(31, 153, 225, 2)" />
-              <stop offset="69.46%" stopColor="rgba(143, 109, 245, 2)" />
+              <stop offset="0%" stopColor="rgba(50, 100, 150, 2)" />
+              <stop offset="69.46%" stopColor="rgba(50, 50, 150, 2)" />
               <stop offset="100%" stopColor="rgba(48, 0, 155, 2)" />
             </linearGradient>
 
@@ -48,7 +48,7 @@ export default function Home() {
       <div className="flex flex-col gap-50">
 
       <HeroSection />
-      {/* <Features /> */}
+      <Features />
       <Values />
       <WhyStarkpay />
       <Faq />

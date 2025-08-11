@@ -4,15 +4,14 @@ import QRCodeLib from "qrcode";
 import QrCodeComponent from "./qr-code";
 import { useMemo } from "react";
 import useExchangeRates from "@/hooks/useExchangeRate";
+import { useAccount } from "@starknet-react/core";
 
 interface MerchantPaymentProps {
-  walletAddress: string;
   onTransaction: (transaction: any) => void;
   addNotification: (notification: any) => void;
 }
 
 export default function MarchantPayment({
-  walletAddress,
   onTransaction,
   addNotification,
 }: MerchantPaymentProps) {
@@ -29,12 +28,14 @@ export default function MarchantPayment({
   const currencies = ["USDT", "USD", "STRK", "NGN"] as const;
   const exchangeRates = useExchangeRates();
 
+  const {address: walletAddress, account, status} = useAccount()
+
   useEffect(() => {
     // Check if rates are loaded
     if (
-      exchangeRates.USDT !== null &&
-      exchangeRates.USDC !== null &&
-      exchangeRates.STRK !== null
+      exchangeRates.rates.USDT !== null &&
+      exchangeRates.rates.USDC !== null &&
+      exchangeRates.rates.STRK !== null
     ) {
       setRatesLoading(false);
     }
@@ -98,7 +99,7 @@ export default function MarchantPayment({
     if (rate === null || rate === undefined) return "Loading...";
 
     // Calculate and format the value
-    return (Number.parseFloat(amount) * rate).toLocaleString();
+    return (Number.parseFloat(amount) * Number(rate)).toLocaleString();
   }, [amount, currency, exchangeRates]);
   const generateQR = async () => {
     if (!amount || !currency) return;
@@ -172,7 +173,7 @@ export default function MarchantPayment({
             title: "Payment Received",
             message: `Received ${netAmount.toFixed(2)} ${currency} (₦${(
               Number.parseFloat(amount) *
-              (exchangeRates[currency as keyof typeof exchangeRates] || 0)
+              Number(exchangeRates[currency as keyof typeof exchangeRates] || 0)
             ).toLocaleString()})`,
             timestamp: new Date(),
             read: false,
@@ -282,6 +283,7 @@ export default function MarchantPayment({
           </div>
         )}
       </div>
+    
 
       {/* ✅ Show View button only if QR was generated & modal closed */}
       {qrCode && hasViewed && !toggle && (

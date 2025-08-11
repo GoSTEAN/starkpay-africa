@@ -22,7 +22,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
   });
 
   return (
-    <div className="relative rounded-[19px] py-[66px] overflow-hidden gap-[22px] flex flex-col lg:flex-row items-center justify-between font-[Montserrat] px-[32px] bg-transparent">
+    <div className="relative rounded-[19px] border border-[#FBFBFB1F] h-full py-[66px] overflow-hidden gap-[22px] flex flex-col lg:flex-row items-center justify-between font-[Montserrat] px-[32px] bg-transparent">
       <div className="lg:w-[200px] fixed z-10 lg:min-h-[488px] justify-between items-center lg:items-start flex lg:justify-start overflow-x-scroll lg:overflow-hidden lg:flex-col gap-[42px]">
         {tabs.map((tab, index) => (
           <button
