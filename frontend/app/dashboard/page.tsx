@@ -2,7 +2,7 @@
 
 import SideNav from "@/components/dashboard/side-nav";
 import { useState, useEffect } from "react";
-import { Home, Users, QrCode, Landmark, History } from "lucide-react";
+import { Home, Users, QrCode, Landmark, History, ArrowUpDown } from "lucide-react";
 import MarchantPayment from "@/components/dashboard/marchant payment/marchant-payment";
 import TransactionHistory from "@/components/dashboard/transactions.tsx/transaction-history";
 import TransactionStatues from "@/components/dashboard/status-state";
@@ -11,6 +11,7 @@ import DashboardHome from "@/components/dashboard/home/home";
 import SplitPayment from "@/components/dashboard/split-payment/splitPayment";
 import NGNWithdrawal from "@/components/dashboard/withdrawal/NgnWithdrawal";
 import StatusState from "@/components/dashboard/status-state";
+import TokenSwap from "@/components/dashboard/token-swap";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Home");
@@ -22,25 +23,30 @@ export default function Dashboard() {
 
   const tabs = [
     {
-      icon: <Home color="white" size={25} className="stroke-3" />,
+      icon: <Home  size={25} color="white" className="stroke-3" />,
       name: "Home",
     },
     {
-      icon: <QrCode color="white" size={25} className="stroke-3" />,
+      icon: <QrCode  size={25} color="white" className="stroke-3" />,
       name: "Marchant pay",
     },
     {
-      icon: <Users color="white" size={25} className="stroke-3" />,
+      icon: <Users  size={25} color="white" className="stroke-3" />,
       name: "Payment split",
     },
+     {
+      icon: <ArrowUpDown  size={25} color="white" className="stroke-3" />,
+      name: "Swap",
+    },
     {
-      icon: <Landmark color="white" size={25} className="stroke-3" />,
+      icon: <Landmark  size={25} color="white" className="stroke-3" />,
       name: "NGN withdrawal",
     },
     {
-      icon: <History color="white" size={25} className="stroke-3" />,
+      icon: <History  size={25} color="white" className="stroke-3" />,
       name: "Transactions",
     },
+    
   ];
 
   const addTransaction = (transaction: any) => {
@@ -59,9 +65,9 @@ export default function Dashboard() {
   }, [Status, Type]);
 
   return (
-    <div className="bg-[#212324] w-screen justify-between lg:gap-[50] relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50] lg:px-[200]">
+    <div className=" bg-[#212324] w-screen justify-between lg:gap-[50] relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50] lg:px-[200]">
       <SideNav tabs={tabs} setTab={setActiveTab} activeTab={activeTab} />
-      <div className="w-full lg:max-w-[1296px] h-[850px] mt-20 items-start bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-2xl overflow-y-scroll ">
+      <div className="w-full lg:max-w-[1296px] h-[850px] mt-20 items-start dark-bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-2xl overflow-y-scroll ">
         {activeTab === "Marchant pay" && (
           <MarchantPayment
             onTransaction={addTransaction}
@@ -74,6 +80,7 @@ export default function Dashboard() {
         {activeTab === "NGN withdrawal" && <NGNWithdrawal />}
         {activeTab === "Home" && <DashboardHome />}
         {activeTab === "Payment split" && <SplitPayment />}
+        {activeTab === "Swap" && <TokenSwap />}
       </div>
       {/* <div className="absolute  top-0 left-0 w-full h-full z-10">
         <StatusState type={Type} status={Status} />

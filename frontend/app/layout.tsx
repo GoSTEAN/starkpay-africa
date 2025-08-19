@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "@/components/ui/navBar";
-import Image from "next/image";
 import StarknetProvider from "@/components/providers/starknet-provider";
 import { NotificationProvider } from "@/components/providers/notification-provider";
+// import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata: Metadata = {
   title: "Starkpay Africa",
@@ -16,13 +16,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <StarknetProvider>
-          <NotificationProvider>
-            <NavBar />
-            <div>{children}</div>
-          </NotificationProvider>
+          {/* <ThemeProvider> */}
+            <NotificationProvider>
+              <NavBar />
+              <div>{children}</div>
+            </NotificationProvider>
+          {/* </ThemeProvider> */}
         </StarknetProvider>
       </body>
     </html>
