@@ -31,8 +31,8 @@ export default function Values() {
 
  
   return (
-    <div className=" w-full h-auto flex items-center ">
-      <div className="flex w-full flex-col  items-center gap-[24px]">
+    <div className=" w-full h-auto  flex items-center ">
+      <div className="flex w-full flex-col  items-center lg:items-start gap-[24px]">
         <div className="py-[10px] cursor-pointer relative px-[31px] w-fit text-white text-[22px] font-[700] flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]">
           How it works
           <span className="absolute top-[50px] left-[32.05px] w-[137px] h-[13px] bg-[#B8A0FF] rounded-[50px] opacity-100 blur-[60px]"></span>
