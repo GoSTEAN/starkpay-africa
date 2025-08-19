@@ -2,7 +2,7 @@
 
 import SideNav from "@/components/dashboard/side-nav";
 import { useState, useEffect } from "react";
-import { Home, Users, QrCode, Landmark, History, ArrowUpDown } from "lucide-react";
+import { Home, Users, QrCode, Landmark, History, ArrowUp } from "lucide-react";
 import MarchantPayment from "@/components/dashboard/marchant payment/marchant-payment";
 import TransactionHistory from "@/components/dashboard/transactions.tsx/transaction-history";
 import TransactionStatues from "@/components/dashboard/status-state";
@@ -35,7 +35,7 @@ export default function Dashboard() {
       name: "Payment split",
     },
      {
-      icon: <ArrowUpDown  size={25} color="white" className="stroke-3" />,
+      icon: <ArrowUp  size={25} color="white" className="stroke-3" />,
       name: "Swap",
     },
     {
@@ -77,7 +77,12 @@ export default function Dashboard() {
         {activeTab === "Transactions" && (
           <TransactionHistory transactions={transactions} />
         )}
-        {activeTab === "NGN withdrawal" && <NGNWithdrawal />}
+        {activeTab === "NGN withdrawal" && (
+          <NGNWithdrawal
+            triggerStatus={setStatus}
+            addNotification={addNotification}
+          />
+        )}
         {activeTab === "Home" && <DashboardHome />}
         {activeTab === "Payment split" && <SplitPayment />}
         {activeTab === "Swap" && <TokenSwap />}

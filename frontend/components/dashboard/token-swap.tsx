@@ -96,7 +96,7 @@ export default function TokenSwap() {
   };
 
   const handleSwap = async () => {
-    if (!account || !address) {
+    if ( !address) {
       setError("Please connect your Starknet wallet");
       return;
     }

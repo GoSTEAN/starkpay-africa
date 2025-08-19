@@ -7,7 +7,7 @@ export default function Profile() {
   const [toggle, setToggle] = useState(false)
 
   const accNo = "8101842464";
-  const verified = true;
+  const verified = false;
 
   const handleToggle = () => {
     setToggle(!toggle)

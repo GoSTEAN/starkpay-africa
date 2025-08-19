@@ -1,14 +1,14 @@
 "use client";
 
-import { Bell, ChevronDown, Menu, Search, ShieldCheck, X } from "lucide-react";
+import { Bell, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { WalletConnectorModal } from "../providers/wallet-connector";
-import Image from "next/image";
 import SearchBar from "./search";
 import Profile from "./profile";
 import { Notifications } from "./notification";
 import { useAccount } from "@starknet-react/core";
+// import ThemeToggle from "./theme-button";
 
 export default function NavBar() {
   const [toggle, setToggle] = React.useState(false);
@@ -85,7 +85,7 @@ export default function NavBar() {
           />
           <Profile />
           
-          {/* Notification Component */}
+          {/* <ThemeToggle />  */}
         </div>
       ) : (
         <div
@@ -156,13 +156,13 @@ export default function NavBar() {
 
             {isLogedin ? (
               <div className="flex flex-col gap-[20] items-center mt-10">
+                <Profile />
                 <SearchBar
                   placeholder="Search transaction ID..."
                   func={handleSearch}
                 />
 
                 <div className="flex justify-evenly items-center gap-[8] w-full">
-                  <Profile />
                   
                   {/* Mobile Notifications Dropdown */}
                   <div className="relative">
