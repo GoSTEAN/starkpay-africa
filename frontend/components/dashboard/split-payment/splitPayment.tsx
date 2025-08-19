@@ -1,146 +1,259 @@
 "use client";
 
-import { Percent, ToggleLeft, Users } from "lucide-react";
-import React from "react";
-import { useState } from "react";
+import { Percent, Users } from "lucide-react";
+import React, { useState } from "react";
+import { useAccount, useContract, useSendTransaction } from "@starknet-react/core";
+import { num } from "starknet";
+import Payment from "./payment";
+import { STARKPAY_ABI as smeAbi } from "@/hooks/useStarkpayContract";
 
+// Define the Split interface
 interface Split {
-  address: string;
-  amount: string;
+  address: string; // Starknet address as string
+  amount: string; // String for input, parsed to u8 for percentages
   currency: string;
   isPercentage: boolean;
-  activeType: "Amount" | "percentage";
 }
 
+// Token contract addresses (replace with actual Starknet addresses)
+const TOKEN_ADDRESSES: { [key: string]: string } = {
+  USDT: "0xYOUR_USDT_CONTRACT_ADDRESS", // Replace with actual USDT contract address
+  USDC: "0xYOUR_USDC_CONTRACT_ADDRESS", // Replace with actual USDC contract address
+  STRK: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", // Replace with actual STRK contract address
+};
+
+// Token decimals for u256 conversion
+const TOKEN_DECIMALS: { [key: string]: number } = {
+  USDT: 6,
+  USDC: 6,
+  STRK: 18,
+};
+
+
+
 export default function SplitPayment() {
-  const [activeType, setActiveType] = useState<"Amount" | "percentage">(
-    "Amount"
-  );
-  const [currency, setCurrency] = useState("NGN");
-  const [toggle, setToggle] = useState(false);
-  const [address, setAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState<string>("USDT");
+  const [toggle, setToggle] = useState<boolean>(false);
+  const [address, setAddress] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
   const [splits, setSplits] = useState<Split[]>([]);
-  const [splitTypeLocked, setSplitTypeLocked] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
+  const [togglePayment, setTogglePayment] = useState<boolean>(false);
+
+  // Store transaction hash as proxy for SME ID
+  const [smeId, setSmeId] = useState<string | null>(null); 
+
+  const { address: connectedAddress } = useAccount();
+
+  // Contract address
+  const smeContractAddress = "0x04217b882eba5144fe47179d8c618eb75f0165ca5070d5e00a6ab586d32f23e6"; 
+  // Create contract instance
+  const { contract } = useContract({
+    abi: smeAbi,
+    address: smeContractAddress,
+  });
+
+  // Hook for sending create_sme3 transaction
+  const { sendAsync: sendCreateSme3, error: createError, data: createData } = useSendTransaction({
+    calls: undefined,
+  });
+
+  // Hook for sending distribute_sme3_payment transaction
+  const { sendAsync: sendDistributePayment, error: distributeError } = useSendTransaction({
+    calls: undefined,
+  });
 
   const handleToggle = () => setToggle(!toggle);
+
+  const handlePaymentToggle = () => setTogglePayment(!togglePayment);
 
   const handleCurrencySelect = (selectedCurrency: string) => {
     setCurrency(selectedCurrency);
     setToggle(false);
   };
 
-  function handleAddSplit() {
-    if (!address || !amount) return;
-
-    if (isNaN(parseFloat(amount))) {
-      setError("Please enter a valid number");
+  const handleAddSplit = () => {
+    if (!address || !amount) {
+      setError("Address and percentage are required");
       return;
     }
 
-    // Check if adding this split would exceed 100% for percentage splits
-    if (activeType === "percentage") {
-      const newTotal = totalPercentage + parseFloat(amount);
-      if (newTotal > 100) {
-        setError("Total percentage cannot exceed 100%");
-
-        return;
-      }
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
+      setError("Please enter a valid percentage");
+      return;
     }
+
+    // Validate percentage: must be u8 (0-255) and integer
+    if (parsedAmount < 0 || parsedAmount > 255 || !Number.isInteger(parsedAmount)) {
+      setError("Percentage must be an integer between 0 and 255");
+      return;
+    }
+
+    // Validate splits length
+    if (splits.length >= 3) {
+      setError("Cannot add more than 3 recipients");
+      return;
+    }
+
+    // Validate total percentage
+    const newTotal = totalPercentage + parsedAmount;
+    if (newTotal > 100) {
+      setError("Total percentage cannot exceed 100%");
+      return;
+    }
+
+    // Validate Starknet address
+    try {
+      num.toHex(address);
+    } catch {
+      setError("Invalid Starknet address");
+      return;
+    }
+
     const newSplit: Split = {
       address,
       amount,
       currency,
-      isPercentage: activeType === "percentage",
-      activeType,
+      isPercentage: true, 
     };
 
     setSplits([...splits, newSplit]);
     setAddress("");
     setAmount("");
+  };
 
-    if (splits.length === 0) {
-      setSplitTypeLocked(true);
-    }
+  const handleConfigureSplit = async () => {
+    console.log("address", connectedAddress, contract)
+    // if (!address || !contract) {
+    //   setError("Please connect your Starknet wallet and ensure contract is loaded");
+    //   return;
+    // }
 
-    if (totalPercentage > 100) {
-      alert("Total percentage cannot exceed 100%");
+    if (splits.length !== 3) {
+      setError("Exactly 3 recipients are required");
       return;
     }
-  }
+
+    const totalPercent = totalPercentage;
+    if (totalPercent !== 100) {
+      setError("Total percentage must equal 100%");
+      return;
+    }
+
+    try {
+      const call = contract?.populate("create_sme3", [
+        splits[0].address,
+        parseInt(splits[0].amount),
+        splits[1].address,
+        parseInt(splits[1].amount),
+        splits[2].address,
+        parseInt(splits[2].amount),
+      ]);
+      if (!call) {
+        setError("Failed to populate contract call for SME creation.");
+        return;
+      }
+      const result = await sendCreateSme3([call]);
+      const smeIdHex = result.transaction_hash;
+      setSmeId(smeIdHex);
+      setError("");
+      alert(`SME configuration created successfully! Transaction Hash: ${smeIdHex}`);
+      setTogglePayment(true); // Automatically open the payment component
+    } catch (err) {
+      setError("Failed to create SME configuration: " + (err as Error).message);
+    }
+  };
+
+  const handleConfirmPayment = async (totalAmount: string, currencyToSend: string) => {
+    if (!connectedAddress) {
+      setError("Please connect your Starknet wallet and ensure contract is loaded");
+      return;
+    }
+
+    if (!smeId) {
+      setError("No SME configuration found. Please configure splits first.");
+      return;
+    }
+
+    const parsedAmount = parseFloat(totalAmount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      setError("Please enter a valid amount to distribute");
+      return;
+    }
+
+    const tokenAddress = TOKEN_ADDRESSES[currencyToSend];
+    if (!tokenAddress) {
+      setError("Invalid token selected");
+      return;
+    }
+
+    // Convert totalAmount to u256 with decimals
+    const decimals = TOKEN_DECIMALS[currencyToSend] || 18;
+    const amountBN = BigInt(Math.floor(parsedAmount * (10 ** decimals)));
+    const low = (amountBN & (BigInt(Math.pow(2, 128)) - BigInt(1))).toString();
+    const high = (amountBN >> BigInt(128)).toString();
+
+    try {
+      // Approve call
+      const approveCall = {
+        contractAddress: tokenAddress,
+        entrypoint: "approve",
+        calldata: [smeContractAddress, low, high],
+      };
+
+      // Distribute call
+      const distributeCall = {
+        contractAddress: smeContractAddress,
+        entrypoint: "distribute_sme3_payment",
+        calldata: [low, high, tokenAddress],
+      };
+
+      await sendDistributePayment([approveCall, distributeCall]);
+      setTogglePayment(false);
+      setSplits([]);
+      setSmeId(null);
+      setError("");
+      alert("Payment distributed successfully!");
+    } catch (err) {
+      setError("Failed to distribute payment: " + (err as Error).message);
+    }
+  };
 
   setTimeout(() => {
     setError("");
   }, 7000);
 
-  // Calculate total allocated amount
-  const totalAllocated = splits.reduce((total, split) => {
-    if (!split.isPercentage) {
-      return total + parseFloat(split.amount) || 0;
-    }
-    return total;
+  // Calculate total allocated percentage
+  const totalPercentage: number = splits.reduce((total: number, split: Split) => {
+    return total + parseFloat(split.amount) || 0;
   }, 0);
 
-  // Calculate total allocated percentage
-  const totalPercentage = splits.reduce((total, split) => {
-    if (split.isPercentage) {
-      return total + parseFloat(split.amount) || 0;
-    }
-    return total;
-  }, 0);
-  const currencyType = ["USDT", "NGN", "USDC", "STRK"];
-  const hasSplits = splits.length > 0;
+  const currencyType: string[] = ["USDT", "USDC", "STRK"]; 
+  const hasSplits: boolean = splits.length > 0;
 
   return (
-    <section className="relative rounded-[19px] py-[66px] w-full h-full  overflow-y-scroll gap-[22px] flex flex-col  font-[Montserrat] px-[32px] bg-[#212324]">
+    <section className="relative rounded-[19px] py-[66px] w-full h-full border overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between items-start">
-        <div className=" flex flex-col gap-[8px] pb-[24px]">
+        <div className="flex flex-col gap-[8px] pb-[24px]">
           <h1 className="text-[32px] font-[600px] text-[#8F6DF5] font-[Montserrat]">
             Payment Split Configuration
           </h1>
           <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-            Set up automatic payment distribution for SMEs (e.g..., owner,
-            workers, reserves)
+            Set up automatic payment distribution for SMEs (e.g., owner, workers, reserves)
           </p>
-        </div>
-        <div className=" flex flex-col gap-[8px] w-fit">
-          <h1 className="text-white/60">Split type</h1>
-          <div className="flex items-center border-[1px] border-white/20 rounded-[8px] ">
-            <button
-              type="button"
-              onClick={() => !splitTypeLocked && setActiveType("Amount")}
-              className={`text-[#FBFBFB] text-[16px] font-[600] font-[Open Sans] cursor-pointer hover:bg-[#FBFBFB12]/50 rounded-l-[8px] py-[10px] px-[20px] border-r-[1px] border-white/20 ${
-                activeType === "Amount" ? "bg-[#FBFBFB12]/80" : ""
-              }`}
-            >
-              Amount
-            </button>
-            <button
-              type="button"
-              onClick={() => !splitTypeLocked && setActiveType("percentage")}
-              className={`text-[#FBFBFB] text-[16px] font-[600] font-[Open Sans] cursor-pointer hover:bg-[#FBFBFB12]/50 rounded-l-[8px] py-[10px] px-[20px] border-r-[1px] border-white/20 ${
-                activeType === "percentage" ? "bg-[#FBFBFB12]/80" : ""
-              }`}
-            >
-              Percentage
-            </button>
-          </div>
-          {splitTypeLocked && (
-            <p className="text-sm text-yellow-400">
-              Split type locked to{" "}
-              {activeType === "Amount" ? "amounts" : "percentages"} after first
-              split
+          {smeId && (
+            <p className="text-[14px] font-[400] font-[Open Sans] text-[#8F6DF5]">
+              Transaction Hash: {smeId}
             </p>
           )}
         </div>
       </div>
-      <div className="w-full h-auto p-[32px] bg-[linear-gradient(253.67deg,rgba(143,109,245,0.1)_18.27%,rgba(33,35,36,0.1)_91.93%)] border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col  items-center ">
-        <div className="w-full rounded-full flex gap-[10px] items-center py-[16px] px-[20px] border-[1px] border-white/20  ">
+      <div className="w-full h-full p-[32px] bg-[linear-gradient(253.67deg,rgba(143,109,245,0.1)_18.27%,rgba(33,35,36,0.1)_91.93%)] border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col items-center">
+        <div className="w-full rounded-full flex gap-[10px] items-center py-[16px] px-[20px] border-[1px] border-white/20">
           <Users color="white" size={20} />
-          <p className="text-[14px] text-white font-[400] font-[Open Sans] ">
-            Contact platform admin to configure splits. Provide recipient
-            addresses and percentage shares (total =100%)
+          <p className="text-[14px] text-white font-[400] font-[Open Sans]">
+            Configure exactly 3 recipient addresses with percentages totaling 100%
           </p>
         </div>
         <div className="flex flex-col lg:flex-row gap-8 w-full">
@@ -152,11 +265,11 @@ export default function SplitPayment() {
               >
                 Address
               </label>
-              <div className="w-full rounded-[48px] items-center  border-[1px] border-white/20 ">
+              <div className="w-full rounded-[48px] items-center border-[1px] border-white/20">
                 <input
                   type="text"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddress(e.target.value)}
                   id="address"
                   placeholder="0x123..."
                   className="text-[#FBFBFB99]/90 w-full text-[16px] py-[16px] px-[20px] font-[600px] outline-none bg-transparent border-none"
@@ -166,52 +279,54 @@ export default function SplitPayment() {
             <div className="flex flex-col gap-[8px] w-full">
               <label
                 className="text-[#8F6DF5] text-[16px] font-[600] font-[Montserrat]"
+                htmlFor="currency"
+              >
+                Currency
+              </label>
+              <div className="w-full relative rounded-[48px] gap-[8px] items-center px-[20px] border-[1px] flex border-white/20">
+                <button
+                  type="button"
+                  onClick={handleToggle}
+                  className="text-white/70 cursor-pointer"
+                >
+                  {currency}
+                </button>
+                <div
+                  className={`${
+                    toggle ? "flex" : "hidden"
+                  } flex-col items-start justify-start absolute top-0 left-0 w-[150px] p-3`}
+                >
+                  <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
+                  {currencyType.map((cur: string, index: number) => (
+                    <button
+                      onClick={() => handleCurrencySelect(cur)}
+                      type="button"
+                      key={index}
+                      className="text-white/70 relative z-10 hover:bg-white/10 w-full"
+                    >
+                      {cur}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-[8px] w-full">
+              <label
+                className="text-[#8F6DF5] text-[16px] font-[600] font-[Montserrat]"
                 htmlFor="amount"
               >
-                {activeType === "Amount" ? "Amount" : "Percentage"}
+                Percentage
               </label>
-              <div className="w-full relative rounded-[48px] gap-[8px] items-center px-[20px] border-[1px] flex border-white/20 ">
-                {activeType === "Amount" && (
-                  <div className="relativ">
-                    <button
-                      type="button"
-                      onClick={handleToggle}
-                      className="text-white/70 cursor-pointer "
-                    >
-                      {currency}
-                    </button>
-                    <div
-                      className={` ${
-                        toggle ? "flex" : "hidden"
-                      } flex-col items-start justify-start absolute top-0 left-0 w-[150px] p-3`}
-                    >
-                      <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
-                      {currencyType.map((cur, index) => (
-                        <button
-                          onClick={() => handleCurrencySelect(cur)}
-                          type="button"
-                          key={index}
-                          className="text-white/70 relative z-10 hover:bg-white/10 w-full "
-                        >
-                          {cur}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="w-full relative rounded-[48px] gap-[8px] items-center px-[20px] border-[1px] flex border-white/20">
                 <input
                   type="text"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
                   id="amount"
-                  placeholder={activeType === "Amount" ? "1000" : "60"}
-                  className={`text-[#FBFBFB99]/90 text-[16px] ${
-                    activeType === "percentage" ? "w-[30px] " : "w-full"
-                  } font-[600px] outline-none bg-transparent border-none py-[16px] `}
+                  placeholder="60"
+                  className="text-[#FBFBFB99]/90 text-[16px] w-[30px] font-[600px] outline-none bg-transparent border-none py-[16px]"
                 />
-                {activeType === "percentage" && (
-                  <p className="text-white/70 ">%</p>
-                )}
+                <p className="text-white/70">%</p>
               </div>
             </div>
 
@@ -223,46 +338,35 @@ export default function SplitPayment() {
             <button
               type="button"
               onClick={handleAddSplit}
-              className="w-full text-[16px] font-[600] font-[Open Sans] text-[#FBFBFB] cursor-pointer bg-[#FBFBFB12] hover:bg-[#FBFBFB12]/20 rounded-[48px] gap-[8px] py-[21px] px-[22px] border-[1px]  border-white/20 "
+              className="w-full text-[16px] font-[600] font-[Open Sans] text-[#FBFBFB] cursor-pointer bg-[#FBFBFB12] hover:bg-[#FBFBFB12]/20 rounded-[48px] gap-[8px] py-[21px] px-[22px] border-[1px] border-white/20"
             >
               Add to split
             </button>
           </div>
           <div className="lg:w-[1px] lg:h-full bg-white/20 w-full h-[1px]"></div>
-          <div className="w-full">
+
+          {/* Payment details display */}
+          <div className="w-full relative">
             {hasSplits ? (
               <>
                 <div className="w-full flex flex-col py-[16px] px-[20px] gap-[8px]">
                   <h1 className="flex justify-between items-center text-white/60 text-[16px] font-[600] font-[Open Sans]">
                     <span>Address</span>
-                    <span>Amount</span>
+                    <span>Percentage</span>
                   </h1>
-                  {splits.map((split, index) => (
+                  {splits.map((split: Split, index: number) => (
                     <div
                       key={index}
                       className="flex justify-between border-b-[1px] border-[white]/30 pb-2 text-white/80 items-center gap-[8px]"
                     >
                       <div className="flex gap-[10px]">
                         <p className="text-white/80 w-fit">{index + 1}</p>
-                        <p className="truncate max-w-[200px]">
-                          {split.address}
-                        </p>
+                        <p className="truncate max-w-[200px]">{split.address}</p>
                       </div>
-                      <p>
-                        {split.amount}{" "}
-                        {!split.isPercentage ? split.currency : "%"}
-                      </p>
+                      <p>{split.amount}%</p>
                     </div>
                   ))}
                   <div className="mt-4 pt-4 border-t border-white/20">
-                    {totalAllocated > 0 && (
-                      <div className="flex justify-between text-white/80">
-                        <span>Total Amount:</span>
-                        <span>
-                          {totalAllocated.toFixed(2)} {currency}
-                        </span>
-                      </div>
-                    )}
                     {totalPercentage > 0 && (
                       <div className="flex justify-between text-white/80">
                         <span>Total Percentage:</span>
@@ -274,9 +378,10 @@ export default function SplitPayment() {
 
                 <button
                   type="button"
-                  className="w-full text-[16px] font-[600] font-[Open Sans] text-[#FBFBFB] cursor-pointer hover:bg-[#FBFBFB12]/20 rounded-[48px] gap-[8px] py-[21px] px-[22px] border-[1px]  border-white/20 "
+                  onClick={handleConfigureSplit}
+                  className="w-full text-[16px] font-[600] font-[Open Sans] text-[#FBFBFB] cursor-pointer hover:bg-[#FBFBFB12]/20 rounded-[48px] gap-[8px] py-[21px] px-[22px] border-[1px] border-white/20"
                 >
-                  Configure Split(Contact Admin)
+                  Configure Split
                 </button>
               </>
             ) : (
@@ -285,6 +390,14 @@ export default function SplitPayment() {
               </h1>
             )}
           </div>
+          <Payment
+            splits={splits}
+            toggle={togglePayment}
+            close={handlePaymentToggle}
+            totalPercentage={totalPercentage}
+            initialCurrency={currency}
+            onConfirm={handleConfirmPayment}
+          />
         </div>
       </div>
     </section>

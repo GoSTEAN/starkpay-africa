@@ -8,7 +8,9 @@ interface Qrcodeprops {
   Amount: number | string;
   currency: string;
   ngnValue: string;
-  label: string
+  label: string;
+  transactionHash: string;
+  paymentId: string;
 }
 export default function QrCodComponent({
   qrcode,
@@ -17,6 +19,8 @@ export default function QrCodComponent({
   currency,
   label,
   ngnValue,
+  transactionHash,
+  paymentId,
 }: Qrcodeprops) {
   return (
     <div
@@ -37,13 +41,13 @@ export default function QrCodComponent({
         </div>
         <div className="flex  gap-2 w-full items-center justify-center">
           <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px] text-[18px] font-[500]">
-           Amount: {Amount} 
+            Amount: {Amount}
           </h1>
           <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
             Token: {currency}
           </h1>
           <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
-            Label: {label}
+            Payment ID: {paymentId}
           </h1>
           <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
             NGN Value: {ngnValue}
