@@ -11,15 +11,16 @@ import {
   useContract,
   useSendTransaction,
 } from "@starknet-react/core";
-import { num } from "starknet";
+import { RpcProvider, num } from "starknet";
 import { STARKPAY_ABI as paymentAbi } from "@/hooks/useStarkpayContract";
-import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
+import useGetBalance from "@/hooks/useGetBalance";
+import StatusState from "@/components/dashboard/status-state";
 
 // Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: tokenAddress.USDT,
-  USDC: tokenAddress.USDC,
-  STRK: tokenAddress.STRK,
+  USDT: "0x068f5c6a61730768477ced7eef7680a434a851905eeff58ee8ba2115ada38e3", // Replace with actual
+  USDC: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+  STRK: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
 };
 
 // Token decimals for u256 conversion
@@ -41,28 +42,33 @@ export default function MarchantPayment({
   const [toggle, setToggle] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false);
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("USDT");
+  const [currency, setCurrency] = useState("STRK");
   const [qrCode, setQrCode] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasViewed, setHasViewed] = useState(false);
   const [pendingTransactions, setPendingTransactions] = useState<any[]>([]);
-  const [ratesLoading, setRatesLoading] = useState(true);
   const [transactionData, setTransactionData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [transactionStatus, setTransactionStatus] = useState<"pending" | "success" | "failed" | null>(null);
 
   const currencies = ["USDT", "USDC", "STRK"] as const;
   const exchangeRates = useExchangeRates();
   const { address: walletAddress, status } = useAccount();
+  const { balances, loading: balanceLoading, error: balanceError } = useGetBalance();
+
+  const provider = new RpcProvider({
+    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+  });
 
   // Contract address
   let contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-
   if (!contractAddress) {
     throw new Error("Contract address is not defined in environment variables");
   }
   if (!contractAddress.startsWith("0x")) {
     contractAddress = `0x${contractAddress}`;
   }
+
   // Create contract instance
   const { contract } = useContract({
     abi: paymentAbi,
@@ -79,23 +85,22 @@ export default function MarchantPayment({
   });
 
   useEffect(() => {
-    if (
-      exchangeRates.rates.USDT !== null &&
-      exchangeRates.rates.USDC !== null &&
-      exchangeRates.rates.STRK !== null
-    ) {
-      setRatesLoading(false);
+    if (createError) {
+      setError(`Transaction error: ${createError.message}`);
+      setTransactionStatus("failed");
     }
-  }, [exchangeRates]);
+  }, [createError]);
 
+  // Poll for transaction status
   useEffect(() => {
-    const interval = setInterval(() => {
+    if (!contract || !pendingTransactions.length) return;
+
+    const interval = setInterval(async () => {
       const now = new Date();
       setPendingTransactions((prev) =>
-        prev.map((tx) => {
+        prev.map(async (tx) => {
           const createdAt = new Date(tx.timestamp);
-          const minutesElapsed =
-            (now.getTime() - createdAt.getTime()) / (1000 * 60);
+          const minutesElapsed = (now.getTime() - createdAt.getTime()) / (1000 * 60);
 
           if (minutesElapsed >= 30 && tx.status === "pending") {
             const updatedTx = {
@@ -103,7 +108,7 @@ export default function MarchantPayment({
               status: "failed",
               failedAt: now,
             };
-
+            setTransactionStatus("failed");
             addNotification({
               id: Date.now(),
               type: "error",
@@ -113,23 +118,61 @@ export default function MarchantPayment({
               read: false,
               category: "qr_code",
             });
-
             onTransaction(updatedTx);
             return updatedTx;
+          }
+
+          // Check payment status via contract
+          try {
+            const paymentStatus = await contract.call("get_payment_status", [tx.paymentId]);
+            const statusValue = paymentStatus.toString();
+            if (statusValue === "1") { // Assuming 1 = success
+              const updatedTx = {
+                ...tx,
+                status: "success",
+                completedAt: now,
+              };
+              setTransactionStatus("success");
+              addNotification({
+                id: Date.now(),
+                type: "success",
+                title: "Payment Successful",
+                message: `Received ${tx.amount} ${tx.currency} (Tx: ${tx.transactionHash.slice(0, 8)}...)`,
+                timestamp: now,
+                read: false,
+                category: "qr_code",
+              });
+              onTransaction(updatedTx);
+              return updatedTx;
+            } else if (statusValue === "2") { // Assuming 2 = failed
+              const updatedTx = {
+                ...tx,
+                status: "failed",
+                failedAt: now,
+              };
+              setTransactionStatus("failed");
+              addNotification({
+                id: Date.now(),
+                type: "error",
+                title: "Payment Failed",
+                message: `QR payment of ${tx.amount} ${tx.currency} failed`,
+                timestamp: now,
+                read: false,
+                category: "qr_code",
+              });
+              onTransaction(updatedTx);
+              return updatedTx;
+            }
+          } catch (err) {
+            console.error("Error checking payment status:", err);
           }
           return tx;
         })
       );
-    }, 60000);
+    }, 10000); // Poll every 10 seconds
 
     return () => clearInterval(interval);
-  }, [addNotification, onTransaction]);
-
-  useEffect(() => {
-    if (createError) {
-      setError(`Transaction error: ${createError.message}`);
-    }
-  }, [createError]);
+  }, [contract, pendingTransactions, addNotification, onTransaction]);
 
   const handleShowDropDown = () => setShowDropDown(!showDropDown);
   const handleFileChange = (e: string) => {
@@ -141,19 +184,12 @@ export default function MarchantPayment({
     if (!amount) return "0";
     const parsedAmount = Number.parseFloat(amount);
     if (isNaN(parsedAmount)) return "0";
-    const rate = exchangeRates[currency as keyof typeof exchangeRates];
+    const rate = exchangeRates.rates[currency as keyof typeof exchangeRates.rates];
     if (rate === null || rate === undefined) return "Loading...";
     return (parsedAmount * Number(rate)).toLocaleString();
   }, [amount, currency, exchangeRates]);
 
   const generateQR = async () => {
-    console.log("Inside generateQR, inputs:", {
-      amount,
-      currency,
-      walletAddress,
-      contract,
-    });
-
     try {
       // Validate inputs
       const parsedAmount = Number.parseFloat(amount);
@@ -170,16 +206,15 @@ export default function MarchantPayment({
       }
 
       if (!contract) {
-        throw new Error(
-          "Contract not initialized. Please check contract address and ABI"
-        );
+        throw new Error("Contract not initialized. Please check contract address and ABI");
       }
 
       setIsGenerating(true);
       setError(null);
+      setTransactionStatus("pending");
 
       // Convert amount to u256
-      const decimals = TOKEN_DECIMALS[currency] || 18;
+      const decimals = TOKEN_DECIMALS[currency];
       const amountBN = BigInt(Math.floor(parsedAmount * 10 ** decimals));
       const TWO = BigInt(2);
       const ONE = BigInt(1);
@@ -190,8 +225,6 @@ export default function MarchantPayment({
         high: (amountBN >> BigInt(128)).toString(),
       };
 
-      console.log("u256 amount:", amountU256);
-
       // Prepare contract call
       const call = contract.populate("create_payment", [
         walletAddress, // receiver
@@ -200,33 +233,28 @@ export default function MarchantPayment({
         "Payment for goods/services", // remarks
       ]);
 
-      console.log("Contract call:", call);
-
       // Send transaction
       const result = await sendCreatePayment([call]);
-      console.log("Transaction result:", result);
-
       if (!result?.transaction_hash) {
         throw new Error("Transaction failed: No transaction hash returned");
       }
 
       const transactionHash = result.transaction_hash;
-      const paymentId = createData?.toString() || "0";
+      const paymentId = createData?.toString() || Date.now().toString();
 
       // Create payment data for QR code
       const paymentData = {
         recipient: walletAddress,
         amount: amount,
         currency: currency,
+        paymentId: paymentId,
       };
 
-      console.log("Payment data for QR:", paymentData);
-
-      const baseUrl = `${window.location.origin}/pay?`;
+      const baseUrl = `${window.location.origin}/pay`;
       const queryString = new URLSearchParams(paymentData).toString();
-      const fullUrl = baseUrl + queryString;
-
+      const fullUrl = `${baseUrl}?${queryString}`;
       const qrCodeDataURL = await QRCodeLib.toDataURL(fullUrl);
+
       // Create transaction object
       const transaction = {
         id: Date.now(),
@@ -253,19 +281,16 @@ export default function MarchantPayment({
         id: Date.now(),
         type: "success",
         title: "QR Code Generated",
-        message: `Waiting for payment of ${amount} ${currency} (Tx: ${transactionHash.slice(
-          0,
-          8
-        )}...)`,
+        message: `Waiting for payment of ${amount} ${currency} (Tx: ${transactionHash.slice(0, 8)}...)`,
         timestamp: new Date(),
         read: false,
         category: "qr_code",
       });
     } catch (err) {
-      const errorMessage =
-        (err as Error).message || "Failed to generate QR code";
+      const errorMessage = (err as Error).message || "Failed to generate QR code";
       console.error("QR generation error:", err);
       setError(errorMessage);
+      setTransactionStatus("failed");
       addNotification({
         id: Date.now(),
         type: "error",
@@ -280,14 +305,8 @@ export default function MarchantPayment({
     }
   };
 
-  // Debug button click
-  const handleButtonClick = () => {
-    console.log("Generate QR button clicked");
-    generateQR();
-  };
-
   return (
-    <section className="relative rounded-[19px] py-[66px] h-full overflow-hidden gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px] bg-transparent">
+    <section className="relative rounded-[19px] py-[66px] h-full overflow-y-scroll gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px] bg-transparent">
       <div className="flex flex-col gap-[22px]">
         <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
           Generate Payment QR Code
@@ -296,19 +315,18 @@ export default function MarchantPayment({
           Accepting USDC, USDT, or STRK payments from customers using QR codes
         </p>
         {!walletAddress && (
-          <p className="text-red-500 text-sm">
-            Please connect your Starknet wallet to proceed
-          </p>
+          <p className="text-red-500 text-sm">Please connect your Starknet wallet to proceed</p>
         )}
+        <p className="text-white">
+          Balance: {balanceLoading ? "Loading..." : balances[currency as keyof typeof balances]} {currency}
+          {balanceError && <span className="text-red-500"> ({balanceError})</span>}
+        </p>
       </div>
 
       <div className="flex flex-col justify-center gap-[36px]">
         <div className="flex flex-col md:flex-row gap-[36px]">
           <div className="flex flex-col gap-[36px] w-full">
-            <label
-              className="text-[22px] text-[#8F6DF5] font-[600]"
-              htmlFor="amount"
-            >
+            <label className="text-[22px] text-[#8F6DF5] font-[600]" htmlFor="amount">
               Payment Amount
             </label>
             <input
@@ -321,10 +339,7 @@ export default function MarchantPayment({
             />
           </div>
           <div className="flex flex-col gap-[36px] w-full relative">
-            <label
-              className="text-[22px] text-[#8F6DF5] font-[600]"
-              htmlFor="currency"
-            >
+            <label className="text-[22px] text-[#8F6DF5] font-[600]" htmlFor="currency">
               Currency
             </label>
             <div className="rounded-[28px] flex justify-between items-center border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
@@ -341,7 +356,6 @@ export default function MarchantPayment({
                 <ChevronDown size={25} color="white" />
               </button>
             </div>
-
             {showDropDown && (
               <div className="w-full flex flex-col absolute top-[100%] py-3 z-10 bg-[#8F6DF51A]/10">
                 <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
@@ -358,23 +372,19 @@ export default function MarchantPayment({
             )}
           </div>
         </div>
-
         {amount && currency && (
           <div className="p-3 bg-transparent -mt-10 rounded-lg">
             <p className="text-sm text-white">
-              NGN Equivalent: ₦{ratesLoading ? "Loading..." : NGNValue}
+              NGN Equivalent: ₦{exchangeRates.rates[currency as keyof typeof exchangeRates.rates] ? NGNValue : "Loading..."}
             </p>
             <p className="text-sm text-gray-500">
-              Fee (0.5%):{" "}
-              {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
+              Fee (0.5%): {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
               {currency !== "NGN" && (
                 <span className="text-xs text-gray-500 mt-1">
                   {" Current Rate: 1 "}
                   {currency}
                   {" = ₦"}
-                  {exchangeRates[
-                    currency as keyof typeof exchangeRates
-                  ]?.toLocaleString() ?? "Loading..."}
+                  {exchangeRates.rates[currency as keyof typeof exchangeRates.rates]?.toLocaleString() ?? "Loading..."}
                 </span>
               )}
             </p>
@@ -382,9 +392,9 @@ export default function MarchantPayment({
         )}
       </div>
 
-      {error && (
+      {(error || balanceError) && (
         <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
-          {error}
+          {error || balanceError}
         </div>
       )}
 
@@ -401,10 +411,10 @@ export default function MarchantPayment({
 
       <div className="w-full rounded-[10px] bg-[#FBFBFB12]/40">
         <button
-          onClick={handleButtonClick}
-          disabled={!amount || !currency || isGenerating}
+          onClick={generateQR}
+          disabled={!amount || !currency || isGenerating || balanceLoading}
           className={`flex gap-[10px] justify-center items-center w-full p-[21px] ${
-            !amount || !currency || isGenerating
+            !amount || !currency || isGenerating || balanceLoading
               ? "opacity-50 cursor-not-allowed"
               : "hover:bg-[#FBFBFB12]/30"
           }`}
@@ -421,12 +431,16 @@ export default function MarchantPayment({
         <span>0.5%</span>
       </div>
 
+      {transactionStatus && (
+        <StatusState type="transaction" status={transactionStatus} />
+      )}
+
       {qrCode && toggle && (
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute inset-0 bg-transparent backdrop-blur-lg" />
           <QrCodeComponent
             Amount={amount}
-            label="shoe payment"
+            label="Payment for goods/services"
             ngnValue={NGNValue}
             currency={currency}
             transactionHash={transactionData?.transactionHash}
