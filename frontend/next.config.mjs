@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-};
+  swcMinify: false, // Disable SWC minification
+  experimental: {
+    esmExternals: 'loose'
+  }
+}
 
-export default nextConfig;
+module.exports = nextConfig
