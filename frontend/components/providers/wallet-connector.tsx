@@ -1,51 +1,67 @@
 "use client";
 
-import {
-  Connector,
-  useAccount,
-  useConnect,
-  useDisconnect,
-} from "@starknet-react/core";
-import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
+import { useAccount } from "@starknet-react/core";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import ConnectButton from "./ConnectButton";
+import Register from "@/components/providers/Register";
+import { RpcProvider, Contract } from "starknet";
+import { STARKPAY_ABI } from "@/hooks/useStarkpayContract";
 
-export function WalletConnectorModal() {
-  const { disconnect } = useDisconnect();
+export default function ConnectWallet() {
+  const { address, account } = useAccount();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [showRegister, setShowRegister] = useState(false);
+  const [contract, setContract] = useState<Contract | null>(null);
 
-  const { connect, connectors } = useConnect();
-  const { starknetkitConnectModal } = useStarknetkitConnectModal({
-    connectors: connectors as StarknetkitConnector[],
-  });
+  // Contract configuration
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  if (!contractAddress) {
+    throw new Error("Contract address is not set in environment variables");
+  }
+  const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "https://starknet-sepolia.public.blastapi.io";
 
-  async function connectWallet() {
-    const { connector } = await starknetkitConnectModal();
-    if (!connector) {
-      return;
+  // Handle contract setup
+  useEffect(() => {
+    if (address) {
+      const provider = new RpcProvider({ nodeUrl: RPC_URL });
+      const contractInstance = new Contract(STARKPAY_ABI, contractAddress, provider);
+      // contractInstance.connect(account);
+      setContract(contractInstance);
+    } else {
+      setContract(null);
+      setShowRegister(false);
     }
-    await connect({ connector: connector as Connector });
-  }
+  }, [address]);
 
-  const { address } = useAccount();
+  // Handle routing based on connection state
+  useEffect(() => {
+    if(!address) return
+    if (address && pathname !== "/dashboard") {
+      router.push("/dashboard");
+    } else if (!address && pathname === "/dashboard") {
+      router.push("/");
+    }
+  }, [address, pathname, router, showRegister]);
 
-  if (!address) {
-    return (
-      <button
-        onClick={connectWallet}
-        className="py-[10px] cursor-pointer flex-none relative px-[31px] w-fit text-white text-[18px] font-[500] flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]"
-      >
-        CONNECT WALLET
-        <span className="absolute top-[50px] left-[32.05px] w-[137px] h-[13px] bg-[#B8A0FF] rounded-[50px] opacity-100 blur-[60px]"></span>
-      </button>
-    );
-  }
   return (
-    <button
-      onClick={() => disconnect()}
-             className="py-[10px] cursor-pointer relative px-[31px] w-fit text-white text-[18px] font-[700] flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]"
-
-    >
-      <div className="text-white flex flex-none font-[500]  text-center sm:text-base  transform">
-        Conn - {address?.slice(0, 4)}...{address?.slice(-2)}
-      </div>
-    </button>
+    <>
+      {showRegister && contract && (
+        <Register
+          onRegister={async (isMerchant: boolean) => {
+            setShowRegister(false);
+          }}
+          isRegistering={false}
+          contract={contract}
+          address={address}
+          account={account}
+        />
+      )}
+      <ConnectButton
+        onShowRegister={() => setShowRegister(true)}
+        contract={contract}
+      />
+    </>
   );
 }

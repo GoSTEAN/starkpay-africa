@@ -60,7 +60,7 @@ export default function WhyStarkpay() {
         </h1>
         <p className="text-[18px] font-[400] font-[Open Sana] text-[#FBFBFB]">
           {" "}
-          Start using StarkPay in minutes — no crypto knowledge required.
+          Start using Swift in minutes — no crypto knowledge required.
         </p>
 
         <div className="w-full grid grid-cols-12 gap-[20px] justify-between mt-[100px]">

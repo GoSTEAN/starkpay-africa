@@ -9,7 +9,7 @@ export type Notification = {
   message: string;
   timestamp: Date;
   read: boolean;
-  category: "payment" | "withdrawal" | "qr_code" | "transaction";
+  category: "payment" | "withdrawal" | "qr_code" | "transaction"| "connection";
   link?: string;
   status?: "pending" | "completed" | "failed";
 };
@@ -91,7 +91,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   return <NotificationContext.Provider value={api}>{children}</NotificationContext.Provider>;
 }
 
-export function useNotifications() {
+export default function useNotifications() {
   const ctx = useContext(NotificationContext);
   if (!ctx) throw new Error("useNotifications must be used within NotificationProvider");
   return ctx;

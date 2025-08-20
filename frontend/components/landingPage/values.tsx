@@ -25,7 +25,7 @@ export default function Values() {
       icon: "/icons/wallet3.svg",
       title: "Withdraw in Naira",
       description:
-        "Request NGN withdrawals from your crypto balance. StarkPay simulates off-ramping with real-time NGN conversion and logs every transaction — fast, transparent, and secure.",
+        "Request NGN withdrawals from your crypto balance. Swift simulates off-ramping with real-time NGN conversion and logs every transaction — fast, transparent, and secure.",
     },
   ];
 
@@ -42,7 +42,7 @@ export default function Values() {
         </h1>
         <p className="text-[18px] font-[400] font-[Open Sana] text-[#FBFBFB]">
           {" "}
-          Start using StarkPay in minutes — no crypto knowledge required.
+          Start using Swift in minutes — no crypto knowledge required.
         </p>
 
         <div className="w-full grid grid-cols-12 gap-[20px] justify-between mt-[100px]">

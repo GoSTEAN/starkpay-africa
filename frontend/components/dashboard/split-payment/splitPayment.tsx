@@ -6,20 +6,21 @@ import { useAccount, useContract, useSendTransaction } from "@starknet-react/cor
 import { num } from "starknet";
 import Payment from "./payment";
 import { STARKPAY_ABI as smeAbi } from "@/hooks/useStarkpayContract";
+import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 
 // Define the Split interface
 interface Split {
-  address: string; // Starknet address as string
-  amount: string; // String for input, parsed to u8 for percentages
+  address: string; 
+  amount: string; 
   currency: string;
   isPercentage: boolean;
 }
 
 // Token contract addresses (replace with actual Starknet addresses)
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: "0xYOUR_USDT_CONTRACT_ADDRESS", // Replace with actual USDT contract address
-  USDC: "0xYOUR_USDC_CONTRACT_ADDRESS", // Replace with actual USDC contract address
-  STRK: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", // Replace with actual STRK contract address
+  USDT: tokenAddress.USDT,
+  USDC: tokenAddress.USDC,
+  STRK: tokenAddress.STRK,
 };
 
 // Token decimals for u256 conversion
@@ -46,11 +47,19 @@ export default function SplitPayment() {
   const { address: connectedAddress } = useAccount();
 
   // Contract address
-  const smeContractAddress = "0x04217b882eba5144fe47179d8c618eb75f0165ca5070d5e00a6ab586d32f23e6"; 
+  let smeContractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS 
+  
+  if (!smeContractAddress) {
+    throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not defined");
+  } 
+  if (!smeContractAddress.startsWith("0x")) {
+  smeContractAddress = `0x${smeContractAddress}`;
+}
+const typedContractAddress = smeContractAddress as `0x${string}`;
   // Create contract instance
   const { contract } = useContract({
     abi: smeAbi,
-    address: smeContractAddress,
+    address: typedContractAddress,
   });
 
   // Hook for sending create_sme3 transaction
@@ -73,7 +82,7 @@ export default function SplitPayment() {
   };
 
   const handleAddSplit = () => {
-    if (!address || !amount) {
+    if (!connectedAddress || !amount) {
       setError("Address and percentage are required");
       return;
     }
@@ -124,7 +133,7 @@ export default function SplitPayment() {
   };
 
   const handleConfigureSplit = async () => {
-    console.log("address", connectedAddress, contract)
+    console.log("address", address, contract)
     // if (!address || !contract) {
     //   setError("Please connect your Starknet wallet and ensure contract is loaded");
     //   return;

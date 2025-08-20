@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { WalletConnectorModal } from "../providers/wallet-connector";
+import ConnectWallet from "../providers/wallet-connector";
 
 export default function HeroSection() {
   return (
@@ -10,19 +10,19 @@ export default function HeroSection() {
             Simplifying Crypto Payments for Nigerian Business
           </h1>
           <p className="text-[20px] lg:text-[30px] font-[400] font-[Open Sans] text-white pb-12">
-            StarkPay offers a seamless crypto payment solution tailored for
+            Swift offers a seamless crypto payment solution tailored for
             Nigerian businesses. Accept crypto payments effortlessly and
             withdraw in naira with ease
           </p>
-          <WalletConnectorModal />
+          <ConnectWallet />
         </div>
-        <div className="w-full border border-white h-full">
-          <div className="w-full border border-white h-[650px] relative">
+        <div className="w-full h-full">
+          <div className="w-full h-[650px] relative">
             <Image
               src="/design.svg"
               alt="Hero Section Image"
               fill
-              className="w-full h-auto border-5 border-red-500"
+              className="w-full h-auto"
             />
           </div>
         </div>

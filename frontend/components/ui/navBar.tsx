@@ -1,23 +1,24 @@
 "use client";
 
-import { Bell, ChevronDown, Menu, Search, ShieldCheck, X } from "lucide-react";
+import { Bell, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { WalletConnectorModal } from "../providers/wallet-connector";
-import Image from "next/image";
+import WalletConnectorModal from "@/components/providers/wallet-connector"
 import SearchBar from "./search";
 import Profile from "./profile";
-import { Notifications } from "./notification";
+import Notifications from "./notification";
 import { useAccount } from "@starknet-react/core";
+import Image from "next/image";
+// import ThemeToggle from "./theme-button";
 
 export default function NavBar() {
   const [toggle, setToggle] = React.useState(false);
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "How it works", href: "/about" },
-    { name: "Privacy", href: "/about" },
-    { name: "FAQs", href: "/services" },
+    { name: "About", href: "/about" },
+    { name: "Privacy", href: "/privacy" },
+    { name: "FAQs", href: "/dashboard" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -38,14 +39,14 @@ export default function NavBar() {
   };
 
   // Function to mark notification as read
-  const markNotificationAsRead = (id: number) => {
+  const markNotificationAsRead = (id: number | string) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, read: true } : n)
     ))
   };
 
   // Function to remove notification
-  const removeNotification = (id: number) => {
+  const removeNotification = (id: number | string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -67,7 +68,7 @@ export default function NavBar() {
     >
       <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
       <div className="text-[24px] relative z-10 flex   font-[500] text-white">
-        {isLogedin ? "Dashboard" : "StarkPay"}
+        {isLogedin ? "Dashboard" : <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />}
       </div>
       
       {isLogedin ? (
@@ -85,7 +86,7 @@ export default function NavBar() {
           />
           <Profile />
           
-          {/* Notification Component */}
+          {/* <ThemeToggle />  */}
         </div>
       ) : (
         <div
@@ -143,7 +144,7 @@ export default function NavBar() {
             <div className="absolute inset-0 bg-white/10 backdrop-blur-lg pointer-events-none" />
             <div className="flex items-center gap-[50px] md:flex-col w-full px-4">
               <div className="text-[24px] relative font-[500]relative z-10 flex text-white">
-                StarkPay
+                <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />
               </div>
             </div>
             <button
@@ -156,13 +157,13 @@ export default function NavBar() {
 
             {isLogedin ? (
               <div className="flex flex-col gap-[20] items-center mt-10">
+                <Profile />
                 <SearchBar
                   placeholder="Search transaction ID..."
                   func={handleSearch}
                 />
 
                 <div className="flex justify-evenly items-center gap-[8] w-full">
-                  <Profile />
                   
                   {/* Mobile Notifications Dropdown */}
                   <div className="relative">
@@ -249,3 +250,8 @@ export default function NavBar() {
     </div>
   );
 }
+
+    // <div>
+    //   <Link href="/about">about</Link>
+    //   <Link href="/sec">sec</Link>
+    // </div>
