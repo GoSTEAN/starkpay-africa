@@ -38,6 +38,7 @@ export default function ConnectWallet() {
   // Handle routing based on connection state
   useEffect(() => {
     if(!address) return
+    if(!address && pathname !== "/pay") return
     if (address && pathname !== "/dashboard") {
       router.push("/dashboard");
     } else if (!address && pathname === "/dashboard") {

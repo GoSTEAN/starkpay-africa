@@ -56,7 +56,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (pathname === "/dashboard" && !hasChecked) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8F6DF5]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-5 border-[#8F6DF5]"></div>
       </div>
     );
   }
