@@ -1,8 +1,10 @@
-import PayerPayment from '@/components/dashboard/marchant payment/PayerPayment'
-import React from 'react'
+import React, { Suspense } from "react";
+import PayerPayment from "@/components/dashboard/marchant payment/PayerPayment";
 
-export default function page() {
+export default function PayPage() {
   return (
-        <PayerPayment />
-  )
+    <Suspense fallback={<div>Loading payment page...</div>}>
+      <PayerPayment />
+    </Suspense>
+  );
 }
