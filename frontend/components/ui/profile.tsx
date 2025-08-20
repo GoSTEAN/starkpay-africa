@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { ShieldCheck, ChevronDown } from "lucide-react";
-import { WalletConnectorModal } from "../providers/wallet-connector";
+import ConnectWallet  from "../providers/wallet-connector";
 
 export default function Profile() {
   const [toggle, setToggle] = useState(false)
@@ -43,7 +43,7 @@ export default function Profile() {
         <div
           className={`absolute top-10 -right-4 ${toggle ? "flex" : "hidden"} bg-transparent  rounded-md p-[20px_10px] border-[#8F6DF58C] border-[0px_1px_1px_1px]`}
         >
-          <WalletConnectorModal />
+          <ConnectWallet />
         </div>
       </div>
     </div>

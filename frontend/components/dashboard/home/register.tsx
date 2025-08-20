@@ -3,9 +3,10 @@
 interface RegisterProps {
   onRegister: (isMerchant: boolean) => void;
   isRegistering: boolean;
+  contract? : "string" | undefined
 }
 
-export default function Register({ onRegister, isRegistering }: RegisterProps) {
+export default function Register({ onRegister, isRegistering,contract }: RegisterProps) {
   return (
     <div className="fixed inset-0 z-50 w-screen h-screen bg-[#212324cc] flex justify-center items-center">
       <div className="max-w-[450px] max-h-[450px] h-full bg-[linear-gradient(253.67deg,rgba(143,109,245,0.1)_18.27%,rgba(33,35,36,0.1)_91.93%)] border border-[#FBFBFB1F] rounded-lg justify-between flex w-full flex-col gap-[20px] py-[18px] px-[16px]">

@@ -6,9 +6,9 @@
     export default function Faq() {
     const faqs = [
         {
-        question: "Do I need crypto experience to use StarkPay?",
+        question: "Do I need crypto experience to use Swift?",
         answer:
-            "Nope! StarkPay uses Starknet’s account abstraction, so you can sign up using just your email or social account — no seed phrase, no gas fees, no crypto knowledge needed.",
+            "Nope! Swift uses Starknet’s account abstraction, so you can sign up using just your email or social account — no seed phrase, no gas fees, no crypto knowledge needed.",
         },
         {
         question: "How do I accept payments as a merchant?",
@@ -26,7 +26,7 @@
             "Payment splitting allows SMEs to automatically divide received payments among multiple wallets. Great for teams, cooperatives, or vendors with revenue sharing.",
         },
         {
-        question: "What fees does StarkPay charge?",
+        question: "What fees does Swift charge?",
         answer:
             "A 0.5% transaction fee is taken from merchant payments. This helps cover operational costs and keeps the platform running smoothly.",
         },
@@ -62,7 +62,7 @@
                 Have any Questions? We’ve Got Your Answers
             </h1>
             <p className="text-[18px] py-[10px] font-[400] text-white">
-                Here are some of the most common things users ask about StarkPay —
+                Here are some of the most common things users ask about Swift —
                 from wallet setup to withdrawals. Still need help? Reach out
                 anytime.
             </p>

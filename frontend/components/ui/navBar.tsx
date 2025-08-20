@@ -3,11 +3,12 @@
 import { Bell, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { WalletConnectorModal } from "../providers/wallet-connector";
+import WalletConnectorModal from "@/components/providers/wallet-connector"
 import SearchBar from "./search";
 import Profile from "./profile";
-import { Notifications } from "./notification";
+import Notifications from "./notification";
 import { useAccount } from "@starknet-react/core";
+import Image from "next/image";
 // import ThemeToggle from "./theme-button";
 
 export default function NavBar() {
@@ -38,14 +39,14 @@ export default function NavBar() {
   };
 
   // Function to mark notification as read
-  const markNotificationAsRead = (id: number) => {
+  const markNotificationAsRead = (id: number | string) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, read: true } : n)
     ))
   };
 
   // Function to remove notification
-  const removeNotification = (id: number) => {
+  const removeNotification = (id: number | string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -67,7 +68,7 @@ export default function NavBar() {
     >
       <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
       <div className="text-[24px] relative z-10 flex   font-[500] text-white">
-        {isLogedin ? "Dashboard" : "StarkPay"}
+        {isLogedin ? "Dashboard" : <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />}
       </div>
       
       {isLogedin ? (
@@ -143,7 +144,7 @@ export default function NavBar() {
             <div className="absolute inset-0 bg-white/10 backdrop-blur-lg pointer-events-none" />
             <div className="flex items-center gap-[50px] md:flex-col w-full px-4">
               <div className="text-[24px] relative font-[500]relative z-10 flex text-white">
-                StarkPay
+                <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />
               </div>
             </div>
             <button
