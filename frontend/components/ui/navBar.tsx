@@ -18,7 +18,7 @@ export default function NavBar() {
     { name: "Home", href: "/" },
     { name: "How it works", href: "/about" },
     { name: "Privacy", href: "/about" },
-    { name: "FAQs", href: "/services" },
+    { name: "FAQs", href: "/dashboard" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -250,3 +250,8 @@ export default function NavBar() {
     </div>
   );
 }
+
+    // <div>
+    //   <Link href="/about">about</Link>
+    //   <Link href="/sec">sec</Link>
+    // </div>

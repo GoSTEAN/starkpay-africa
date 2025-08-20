@@ -15,15 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" >
-      <body
-        
-      >
-        <StarknetProvider>
-          {/* <SideNav /> */}
+
           <div>{children}</div>
-        </StarknetProvider>
-      </body>
-    </html>
+
+
   );
 }

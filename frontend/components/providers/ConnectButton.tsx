@@ -39,7 +39,7 @@ export default function ConnectButton({ onShowRegister, contract }: ConnectButto
       });
 
       // Redirect to dashboard after successful connection
-      router.push("/dashboard");
+      // router.push("/dashboard");
     } catch (err) {
       const errorMessage = (err as Error).message || "Failed to connect wallet";
       addNotification({
