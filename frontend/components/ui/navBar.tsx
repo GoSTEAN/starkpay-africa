@@ -16,8 +16,8 @@ export default function NavBar() {
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "How it works", href: "/about" },
-    { name: "Privacy", href: "/about" },
+    { name: "About", href: "/about" },
+    { name: "Privacy", href: "/privacy" },
     { name: "FAQs", href: "/dashboard" },
     { name: "Contact", href: "/contact" },
   ];

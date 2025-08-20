@@ -7,6 +7,13 @@ interface StatusProp {
   onClickFunc?: React.MouseEventHandler<HTMLButtonElement> | undefined;
   status?: string;
 }
+interface StatusProp {
+  type?: string;
+  status?: string;
+  onConfirm?: () => void | Promise<void>;
+  onCancel?: () => void;
+}
+
 
 export default function StatusState({ type, onClickFunc, status }: StatusProp) {
   const statues = [

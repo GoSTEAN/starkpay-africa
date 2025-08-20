@@ -15,9 +15,12 @@ import StatusState from "@/components/dashboard/status-state";
 import { num } from "starknet";
 import { TOKEN_ADDRESSES } from "autoswap-sdk";
 
+
 interface NGNWithdrawalProps {
   triggerStatus: (type: string, status: string) => void;
   addNotification: (notification: any) => void;
+  onConfirm?: () => Promise<void> | void; 
+
 }
 
 export default function NGNWithdrawal({
