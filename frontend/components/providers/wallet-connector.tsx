@@ -27,7 +27,6 @@ export default function ConnectWallet() {
     if (address) {
       const provider = new RpcProvider({ nodeUrl: RPC_URL });
       const contractInstance = new Contract(STARKPAY_ABI, contractAddress, provider);
-      // contractInstance.connect(account);
       setContract(contractInstance);
     } else {
       setContract(null);
@@ -37,11 +36,22 @@ export default function ConnectWallet() {
 
   // Handle routing based on connection state
   useEffect(() => {
-    if(!address) return
+    // Don't do any redirects for /pay route
+    if (pathname === "/pay") {
+      return;
+    }
+
+    if (!address) {
+      // If not connected and on dashboard, redirect to home
+      if (pathname === "/dashboard") {
+        router.push("/");
+      }
+      return;
+    }
+
+    // If connected and not on dashboard, redirect to dashboard
     if (address && pathname !== "/dashboard") {
       router.push("/dashboard");
-    } else if (!address && pathname === "/dashboard") {
-      router.push("/");
     }
   }, [address, pathname, router, showRegister]);
 
