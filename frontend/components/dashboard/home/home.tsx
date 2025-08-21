@@ -92,7 +92,7 @@ export default function DashboardHome() {
           <h1 className="text-[22px] font-[600] text-[#8F6DF5] font-[Montserrat]">
             Tali Nanzing Moses
           </h1>
-          <div className="w-[183.75px] flex items-center justify-center h-[183.75px] overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
+          <div className="lg:w-[183.75px] w-[120px] flex items-center justify-center lg:h-[183.75px] h-[120px] overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
             {img ? (
               <Image
                 src={img}
@@ -116,7 +116,7 @@ export default function DashboardHome() {
             <h1 className="text-[14px] font-[600] text-[#8F6DF5] font-[Montserrat]">
               Connected Wallet Address
             </h1>
-            <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
+            <p className="text-[16px] truncate font-[400] font-[Open Sans] text-[#FBFBFB]">
               {address ? address : "No wallet connected"}
             </p>
           </div>

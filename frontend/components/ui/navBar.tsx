@@ -3,17 +3,19 @@
 import { Bell, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import WalletConnectorModal from "@/components/providers/wallet-connector"
+import WalletConnectorModal from "@/components/providers/wallet-connector";
 import SearchBar from "./search";
 import Profile from "./profile";
 import Notifications from "./notification";
 import { useAccount } from "@starknet-react/core";
 import Image from "next/image";
+import useNotifications from "../providers/notification-provider";
+import ConnectWallet from "@/components/providers/wallet-connector";
 // import ThemeToggle from "./theme-button";
 
 export default function NavBar() {
   const [toggle, setToggle] = React.useState(false);
-  const [notifications, setNotifications] = React.useState<any[]>([]);
+
   const navItems = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -22,8 +24,16 @@ export default function NavBar() {
     { name: "Contact", href: "/contact" },
   ];
 
-  const { address: isLogedin  } = useAccount();
-  
+  const {
+    notifications,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+  } = useNotifications();
+
+  const { address: isLogedin } = useAccount();
 
   const handleToggle = () => {
     setToggle(!toggle);
@@ -31,33 +41,6 @@ export default function NavBar() {
 
   const handleSearch = () => {
     console.log("Search function triggered");
-  };
-
-  // Function to add a notification (you can call this from other components)
-  const addNotification = (notification: any) => {
-    setNotifications(prev => [notification, ...prev]);
-  };
-
-  // Function to mark notification as read
-  const markNotificationAsRead = (id: number | string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n)
-    ))
-  };
-
-  // Function to remove notification
-  const removeNotification = (id: number | string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  // Function to mark all notifications as read
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  // Function to clear all notifications
-  const clearAllNotifications = () => {
-    setNotifications([]);
   };
 
   return (
@@ -68,9 +51,18 @@ export default function NavBar() {
     >
       <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
       <div className="text-[24px] relative z-10 flex   font-[500] text-white">
-        {isLogedin ? "Dashboard" : <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />}
+        {isLogedin ? (
+          "Dashboard"
+        ) : (
+          <Image
+            src={"/swiftLogo.svg"}
+            alt="swift logo"
+            width={100}
+            height={100}
+          />
+        )}
       </div>
-      
+
       {isLogedin ? (
         <div className="hidden lg:flex gap-[8] items-center w-full justify-end">
           <SearchBar
@@ -79,18 +71,18 @@ export default function NavBar() {
           />
           <Notifications
             notifications={notifications}
-            onMarkAsRead={markNotificationAsRead}
+            onMarkAsRead={markAsRead}
             onMarkAllAsRead={markAllAsRead}
             onRemove={removeNotification}
-            onClearAll={clearAllNotifications}
+            onClearAll={clearAll}
           />
           <Profile />
-          
+
           {/* <ThemeToggle />  */}
         </div>
       ) : (
         <div
-          className={`w-fit hidden md:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] mx-auto border-white`}
+          className={`w-fit hidden lg:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] mx-auto border-white`}
         >
           <div className="absolute inset-0 rounded-[30px] bg-white/10 backdrop-blur-lg pointer-events-none" />
           {navItems.map((item, index) => (
@@ -104,17 +96,16 @@ export default function NavBar() {
           ))}
         </div>
       )}
-      
-      <div className="z-10 flex gap-5 items-center">
+
+      <div className="z-10 absolute right-8  lg:hidden flex gap-5 items-center">
         <div className="lg:hidden flex items-center justify-center">
-          <button 
-            className="relative"
-            onClick={() => setToggle(!toggle)}
-          >
+          <button className="relative" onClick={() => setToggle(!toggle)}>
             <Bell className="h-5 w-5 text-[#8F6DF5]" />
-            {notifications.filter(n => !n.read).length > 0 && (
+            {notifications.filter((n) => !n.read).length > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs">
-                {notifications.filter(n => !n.read).length > 9 ? '9+' : notifications.filter(n => !n.read).length}
+                {notifications.filter((n) => !n.read).length > 99
+                  ? "99+"
+                  : notifications.filter((n) => !n.read).length}
               </span>
             )}
           </button>
@@ -126,25 +117,31 @@ export default function NavBar() {
         >
           <Menu color="white" size={30} />
         </button>
-
-        
       </div>
-      <div className={`flex w-fit gap-8 items-center pr-3 ${isLogedin?  "hidden" : "flex"}`}>
-        <div className={` hidden md:flex`}>
+      <div
+        className={`flex w-fit gap-8 items-center pr-3 ${
+          isLogedin ? "hidden" : "flex"
+        }`}
+      >
+        <div className={` hidden lg:flex`}>
           <WalletConnectorModal />
         </div>
 
-        {/* Mobile Notification Button */}
       </div>
 
       {/* Mobile Menu */}
-      <div className="flex w-full absolute z-10 md:hidden left-0 top-0">
+      <div className="flex w-full absolute z-10 lg:hidden left-0 top-0">
         <div className={`w-full ${toggle ? "flex" : "hidden"} justify-start`}>
           <div className="relative md:flex w-full items-center bg-white/10 p-[10px] border-b-[0.1px] border-white overflow-hidden">
             <div className="absolute inset-0 bg-white/10 backdrop-blur-lg pointer-events-none" />
             <div className="flex items-center gap-[50px] md:flex-col w-full px-4">
               <div className="text-[24px] relative font-[500]relative z-10 flex text-white">
-                <Image src={"/swiftLogo.svg"} alt="swift logo" width={100} height={100} />
+                <Image
+                  src={"/swiftLogo.svg"}
+                  alt="swift logo"
+                  width={100}
+                  height={100}
+                />
               </div>
             </div>
             <button
@@ -164,25 +161,28 @@ export default function NavBar() {
                 />
 
                 <div className="flex justify-evenly items-center gap-[8] w-full">
-                  
                   {/* Mobile Notifications Dropdown */}
                   <div className="relative">
                     <button className="relative">
                       <Bell className="h-5 w-5 text-[#8F6DF5]" />
-                      {notifications.filter(n => !n.read).length > 0 && (
+                      {notifications.filter((n) => !n.read).length > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs">
-                          {notifications.filter(n => !n.read).length > 9 ? '9+' : notifications.filter(n => !n.read).length}
+                          {notifications.filter((n) => !n.read).length > 9
+                            ? "9+"
+                            : notifications.filter((n) => !n.read).length}
                         </span>
                       )}
                     </button>
-                    
+
                     {/* Mobile Notifications List */}
                     {notifications.length > 0 && (
                       <div className="absolute right-0 mt-2 w-72 bg-[#212324] rounded-lg shadow-lg border border-[#8F6DF5]/20 z-50">
                         <div className="p-3 border-b border-[#8F6DF5]/20">
                           <div className="flex justify-between items-center">
-                            <h3 className="text-white font-medium">Notifications</h3>
-                            <button 
+                            <h3 className="text-white font-medium">
+                              Notifications
+                            </h3>
+                            <button
                               onClick={markAllAsRead}
                               className="text-[#8F6DF5] text-sm"
                             >
@@ -191,27 +191,30 @@ export default function NavBar() {
                           </div>
                         </div>
                         <div className="max-h-60 overflow-y-auto">
-                          {notifications.slice(0, 5).map(notification => (
-                            <div 
-                              key={notification.id} 
-                              className={`p-3 border-b border-[#8F6DF5]/10 ${!notification.read ? 'bg-[#8F6DF5]/10' : ''}`}
+                          {notifications.slice(0, 5).map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-3 border-b border-[#8F6DF5]/10 ${
+                                !notification.read ? "bg-[#8F6DF5]/10" : ""
+                              }`}
                             >
                               <div className="flex justify-between">
-                                <p className="text-white text-sm">{notification.title}</p>
+                                <p className="text-white text-sm">
+                                  {notification.title}
+                                </p>
                                 {!notification.read && (
                                   <span className="w-2 h-2 bg-[#8F6DF5] rounded-full"></span>
                                 )}
                               </div>
-                              <p className="text-[#8F6DF5] text-xs mt-1">{notification.message}</p>
+                              <p className="text-[#8F6DF5] text-xs mt-1">
+                                {notification.message}
+                              </p>
                             </div>
                           ))}
                         </div>
                         <div className="p-3 text-center">
-                          <button 
-                            onClick={() => {
-                              // Here you would navigate to the full notifications page
-                              // or expand the dropdown to show all
-                            }}
+                          <button
+                            onClick={() => {}}
                             className="text-[#8F6DF5] text-sm"
                           >
                             View all notifications
@@ -235,12 +238,7 @@ export default function NavBar() {
                 ))}
 
                 <div className="flex w-full justify-end mt-2">
-                  <button
-                    type="button"
-                    className="py-[10px] px-[20px] lg:px-[31px] flex-none flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]"
-                  >
-                    connect wallet
-                  </button>
+                  <ConnectWallet />
                 </div>
               </div>
             )}
@@ -250,8 +248,3 @@ export default function NavBar() {
     </div>
   );
 }
-
-    // <div>
-    //   <Link href="/about">about</Link>
-    //   <Link href="/sec">sec</Link>
-    // </div>

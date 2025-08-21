@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAccount } from "@starknet-react/core";
 import useNotifications from "@/components/providers/notification-provider";
 
@@ -10,19 +10,23 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { address: walletAddress, status, isConnected } = useAccount();
+  const { address: walletAddress, status } = useAccount();
   const router = useRouter();
+  const pathname = usePathname();
   const { addNotification } = useNotifications();
-  const [isChecking, setIsChecking] = useState(true);
+  const [hasChecked, setHasChecked] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
-    const checkAccess = async () => {
-      setIsChecking(true);
-      
-      // Wait a moment for the connection status to stabilize
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      if (status === "disconnected" || !walletAddress) {
+    // Only check if we're on the dashboard route
+    if (pathname !== "/dashboard") {
+      setHasChecked(true);
+      return;
+    }
+
+    // Check if disconnected or no wallet address
+    if (status === "disconnected" || !walletAddress) {
+      if (!hasChecked) {
         addNotification({
           id: Date.now(),
           type: "error",
@@ -33,26 +37,30 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
           category: "connection",
           status: "failed",
         });
-        router.push("/");
-      } else {
-        setIsChecking(false);
+        setShouldRedirect(true);
       }
-    };
+      setHasChecked(true);
+    } else {
+      setHasChecked(true);
+      setShouldRedirect(false);
+    }
+  }, [walletAddress, status, pathname, addNotification, hasChecked]);
 
-    checkAccess();
-  }, [walletAddress, status, router, addNotification]);
+  useEffect(() => {
+    if (shouldRedirect) {
+      router.push("/");
+    }
+  }, [shouldRedirect, router]);
 
-  if (isChecking) {
+  // Show loading only on initial check for dashboard
+  if (pathname === "/dashboard" && !hasChecked) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8F6DF5]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-5 border-[#8F6DF5]"></div>
       </div>
     );
   }
 
-  if (status === "disconnected" || !walletAddress) {
-    return null;
-  }
-
+  // Allow children to render - useEffect handles redirects
   return <>{children}</>;
 }

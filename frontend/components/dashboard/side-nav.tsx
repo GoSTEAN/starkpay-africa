@@ -8,7 +8,7 @@ interface SideNavProps {
 
 export default function SideNav({ tabs, activeTab, setTab }: SideNavProps) {
   return (
-    <div className="lg:w-[200px] relative z-10 lg:min-h-[488px] justify-between items-center lg:items-start flex lg:justify-start overflow-x-scroll lg:overflow-hidden lg:flex-col gap-[42px]">
+    <div className="lg:w-[200px] min-h-[60px] relative z-10 lg:min-h-[488px] justify-between items-center lg:items-start flex lg:justify-start overflow-x-scroll lg:overflow-hidden lg:flex-col gap-[42px]">
       {tabs.map((tab, index) => (
         <button
           key={index}

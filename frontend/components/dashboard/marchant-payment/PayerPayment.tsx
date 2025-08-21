@@ -1,61 +1,17 @@
-// PayerPayment.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAccount } from "@starknet-react/core";
-import { RpcProvider, Contract, num } from "starknet";
-import QrReader from "react-qr-scanner";
+import { RpcProvider, Contract } from "starknet";
 import { useSearchParams } from "next/navigation";
-
-const ERC20_ABI = [
-  {
-    name: "transfer",
-    type: "function",
-    inputs: [
-      {
-        name: "recipient",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "amount",
-        type: "core::integer::u256",
-      },
-    ],
-    outputs: [
-      {
-        name: "success",
-        type: "core::bool",
-      },
-    ],
-    state_mutability: "external",
-  },
-
-  {
-    name: "balance_of",
-    type: "function",
-    inputs: [
-      {
-        name: "account",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-    ],
-    outputs: [{ name: "balance", type: "core::integer::u256" }],
-    state_mutability: "view",
-  },
-  {
-    name: "decimals",
-    type: "function",
-    inputs: [],
-    outputs: [{ name: "decimals", type: "core::integer::u8" }],
-    state_mutability: "view",
-  },
-];
-
-// Token contract addresses (replace with actual Sepolia testnet addresses)
+import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
+import { STARKPAY_ABI as ERC20_ABI } from "@/hooks/useStarkpayContract";
+import { Html5QrcodeScanner } from "html5-qrcode/cjs/html5-qrcode-scanner.js";
+// Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: "0x<correct_usdt_address>",
-  USDC: "0x<correct_usdc_address>",
-  STRK: "0x<correct_strk_address>",
+  USDT: tokenAddress.USDT,
+  USDC: tokenAddress.USDC,
+  STRK: tokenAddress.STRK,
 };
 
 // Token decimals
@@ -70,12 +26,17 @@ export default function PayerPayment() {
   const searchParams = useSearchParams();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("USDT");
+  const [currency, setCurrency] = useState("STRK");
   const [scanResult, setScanResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showScanner, setShowScanner] = useState(true);
+  const [scannerError, setScannerError] = useState<string | null>(null);
+  const [isScannerInitialized, setIsScannerInitialized] = useState(false);
+
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerContainerRef = useRef<HTMLDivElement>(null);
 
   const provider = new RpcProvider({
     nodeUrl: "https://starknet-sepolia.public.blastapi.io",
@@ -91,38 +52,111 @@ export default function PayerPayment() {
       setRecipient(queryRecipient);
       setAmount(queryAmount);
       setCurrency(queryCurrency);
-      setShowScanner(false); // Hide scanner if pre-filled from URL
+      setShowScanner(false);
     }
   }, [searchParams]);
 
-  const handleScan = (data: string | null) => {
-    if (data) {
-      setScanResult(data);
+  useEffect(() => {
+    if (!showScanner || !scannerContainerRef.current) return;
+
+    const initializeScanner = async () => {
       try {
-        // Parse the scanned URL
-        const url = new URL(data);
-        const params = new URLSearchParams(url.search);
-        const scannedRecipient = params.get("recipient");
-        const scannedAmount = params.get("amount");
-        const scannedCurrency = params.get("currency");
-
-        if (scannedRecipient && scannedAmount && scannedCurrency) {
-          setRecipient(scannedRecipient);
-          setAmount(scannedAmount);
-          setCurrency(scannedCurrency);
-          setShowScanner(false); // Hide scanner after successful scan
-        } else {
-          setError("Invalid QR code data");
+        if (scannerRef.current) {
+          // Clean up previous scanner if it exists
+          try {
+            await scannerRef.current.clear();
+          } catch (cleanupError) {
+            console.log("Cleanup error:", cleanupError);
+          }
         }
-      } catch (err) {
-        setError("Failed to parse QR code");
-      }
-    }
-  };
 
-  const handleScanError = (err: any) => {
-    console.error(err);
-    setError("Error scanning QR code");
+        scannerRef.current = new Html5QrcodeScanner(
+          "qr-reader",
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+          },
+          false
+        );
+
+        scannerRef.current.render(
+          (decodedText: string) => {
+            handleScan(decodedText);
+          },
+          (errorMessage: string) => {
+            // Don't show errors for normal operation like no QR code found
+            if (!errorMessage.includes("No MultiFormat Readers")) {
+              console.log("QR Scanner info:", errorMessage);
+            }
+          }
+        );
+
+        setIsScannerInitialized(true);
+        setScannerError(null);
+      } catch (err) {
+        console.error("Failed to initialize QR scanner:", err);
+        setScannerError(
+          "Failed to initialize QR scanner. Please check camera permissions."
+        );
+      }
+    };
+
+    initializeScanner();
+
+    return () => {
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.clear().catch((err: any) => {
+            console.log("Scanner cleanup error:", err);
+          });
+        } catch (err) {
+          console.log("Error during scanner cleanup:", err);
+        }
+      }
+    };
+  }, [showScanner]);
+
+  const handleScan = (data: string) => {
+    if (!data || data.trim() === "") {
+      return;
+    }
+
+    setScanResult(data);
+    try {
+      if (!data.startsWith("http://") && !data.startsWith("https://")) {
+        setError("QR code must contain a valid URL");
+        return;
+      }
+
+      const url = new URL(data);
+      const params = new URLSearchParams(url.search);
+      const scannedRecipient = params.get("recipient");
+      const scannedAmount = params.get("amount");
+      const scannedCurrency = params.get("currency");
+
+      if (scannedRecipient && scannedAmount && scannedCurrency) {
+        setRecipient(scannedRecipient);
+        setAmount(scannedAmount);
+        setCurrency(scannedCurrency);
+        setShowScanner(false);
+        setScannerError(null);
+        setError("");
+
+        if (scannerRef.current) {
+          try {
+            scannerRef.current.clear().catch(console.error);
+          } catch (err) {
+            console.log("Error stopping scanner:", err);
+          }
+        }
+      } else {
+        setError("Invalid QR code: missing required payment parameters");
+      }
+    } catch (err) {
+      console.error("QR parsing error:", err);
+      setError("Failed to parse QR code - invalid URL format");
+    }
   };
 
   const handlePay = async () => {
@@ -136,7 +170,7 @@ export default function PayerPayment() {
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = Number.parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       setError("Invalid amount");
       return;
@@ -172,8 +206,23 @@ export default function PayerPayment() {
     }
   };
 
+  const restartScanner = () => {
+    setShowScanner(true);
+    setScannerError(null);
+    setError("");
+    setScanResult("");
+  };
+
+  const useManualInput = () => {
+    setShowScanner(false);
+    setScannerError(null);
+    setRecipient("");
+    setAmount("");
+    setCurrency("STRK");
+  };
+
   return (
-    <section className="relative z-[99] rounded-[19px] py-[66px] w-full h-full overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+    <section className="relative pt-10 rounded-[19px] py-[66px] max-w-[800px] max-h-[800px] border border-white/10 z-10 text-white w-full h-full overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="flex flex-col gap-[8px] pb-[24px]">
         <h1 className="text-[32px] font-[600] text-[#8F6DF5] font-[Montserrat]">
           Scan and Pay
@@ -187,22 +236,69 @@ export default function PayerPayment() {
         {showScanner ? (
           <div className="w-full flex flex-col gap-4">
             <h2 className="text-white text-lg">Scan QR Code</h2>
-            <QrReader
-              delay={300}
-              onError={handleScanError}
-              onScan={handleScan}
-              style={{ width: "100%" }}
+            {scannerError && (
+              <div className="text-red-500 p-2 bg-red-500/10 rounded mb-4">
+                <p className="mb-2">{scannerError}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={restartScanner}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={useManualInput}
+                    className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                  >
+                    Enter Manually
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!isScannerInitialized && !scannerError && (
+              <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-white">
+                Initializing QR scanner...
+              </div>
+            )}
+
+            <div
+              ref={scannerContainerRef}
+              id="qr-reader"
+              className="w-full"
+              style={{ minHeight: "256px" }}
             />
-            <p className="text-white">{scanResult}</p>
+
+            <p className="text-white text-sm mt-4">
+              Point your camera at a merchant's QR code
+            </p>
+
+            <button
+              onClick={useManualInput}
+              className="mt-4 px-4 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 self-start"
+            >
+              Enter Payment Details Manually
+            </button>
           </div>
         ) : (
           <div className="w-full flex flex-col gap-4">
-            <label className="text-white">Recipient</label>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white text-lg">Payment Details</h3>
+              <button
+                onClick={restartScanner}
+                className="px-4 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+              >
+                Scan QR Code
+              </button>
+            </div>
+
+            <label className="text-white">Recipient Address</label>
             <input
               type="text"
               value={recipient}
-              readOnly
-              className="bg-gray-800 text-white p-2 rounded"
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="Enter recipient address"
+              className="outline-none w-full text-white min-h-[54px] rounded-[28px] border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]"
             />
 
             <label className="text-white">Amount</label>
@@ -210,35 +306,38 @@ export default function PayerPayment() {
               type="text"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="bg-gray-800 text-white p-2 rounded"
+              placeholder="Enter amount"
+              className="outline-none w-full text-white min-h-[54px] rounded-[28px] border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]"
             />
 
             <label className="text-white">Currency</label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="bg-gray-800 text-white p-2 rounded"
+              className="bg-[#8F6DF51A]/10 text-white  py-[16px] px-[20px] rounded-xl  border border-gray-600"
             >
-              <option>USDT</option>
-              <option>USDC</option>
-              <option>STRK</option>
+              <option value="USDT">USDT</option>
+              <option value="USDC">USDC</option>
+              <option value="STRK">STRK</option>
             </select>
 
-            <button
-              onClick={handlePay}
-              disabled={loading}
-              className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
-            >
-              {loading ? "Processing..." : "Pay"}
-            </button>
+            <div className="w-full  flex justify-between">
+              <div className="w-full">
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+                {success && <p className="text-green-500 mt-2">{success}</p>}
+              </div>
 
-            {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>}
+              <button
+                onClick={handlePay}
+                disabled={loading}
+                className="min-w-[150px] z-10 text-[16px] font-[600] font-[Open Sans] text-[#FBFBFB] cursor-pointer bg-[#FBFBFB12] hover:bg-[#FBFBFB12]/20 rounded-[48px] gap-[8px] py-[14px] px-[22px] border-[1px] border-white/20"
+              >
+                {loading ? "Processing..." : "Pay"}
+              </button>
+            </div>
           </div>
         )}
       </div>
     </section>
   );
 }
-
-

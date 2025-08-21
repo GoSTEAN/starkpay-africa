@@ -39,11 +39,11 @@ export function useUserRole() {
     }
   };
 
-  useEffect(() => {
-    checkUserRole();
-    const interval = setInterval(checkUserRole, 30000);
-    return () => clearInterval(interval);
-  }, [address]);
+    useEffect(() => {
+      checkUserRole();
+      const interval = setInterval(checkUserRole, 300000);
+      return () => clearInterval(interval);
+    }, [address]);
 
   return { 
     role,
