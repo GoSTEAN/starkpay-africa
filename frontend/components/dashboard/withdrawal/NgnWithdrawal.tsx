@@ -360,7 +360,7 @@ if(!contract){
         <div className="flex flex-col gap-[18px] w-full">
           <div className="flex flex-col gap-[18px] w-full">
             <h1 className="text-foreground">Account</h1>
-            <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
+            <div className="border-[2px] rounded-[12px] w-full flex-col xl:flex-row border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
               <div className="flex flex-col gap-[16px]">
                 <h1 className="opacity-50 text-foreground">From</h1>
                 <div className="relative">
@@ -410,7 +410,7 @@ if(!contract){
                 />
               </div>
             </div>
-            <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
+            <div className="border-[2px] rounded-[12px] w-full flex-col xl:flex-row border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
               <div className="flex flex-col gap-[16px]">
                 <h1 className="opacity-50 text-foreground">To</h1>
                 <div className="relative">
@@ -436,7 +436,7 @@ if(!contract){
                 />
               </div>
             </div>
-            <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
+            <div className="border-[2px] rounded-[12px] w-full flex-col xl:flex-row border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
               <div className="flex flex-col gap-[16px]">
                 <h1 className="opacity-50 text-foreground">Fees</h1>
                 <div className="relative">
