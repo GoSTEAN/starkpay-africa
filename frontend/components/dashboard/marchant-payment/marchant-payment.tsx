@@ -232,7 +232,7 @@ export default function MarchantPayment({
     setShowDropDown(false);
   };
 
-  const NGNValue = useMemo(() => {
+  const currencyValue = useMemo(() => {
     if (!amount) return "0";
     const parsedAmount = Number.parseFloat(amount);
     if (isNaN(parsedAmount)) return "0";
@@ -321,7 +321,7 @@ export default function MarchantPayment({
         currency,
         status: "pending",
         timestamp: new Date(),
-        ngnValue: NGNValue,
+        ngnValue: currencyValue,
         transactionHash: transactionHash,
         paymentId: paymentId,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000),
@@ -400,7 +400,7 @@ export default function MarchantPayment({
       </div>
 
       <div className="flex flex-col justify-center gap-[36px]">
-        <div className="flex flex-col md:flex-row gap-[36px]">
+        <div className="flex flex-col  gap-[36px]">
           <div className="flex flex-col gap-[36px] w-full">
             <label
               className="text-[22px] text-[#8F6DF5] font-[600]"
@@ -408,14 +408,24 @@ export default function MarchantPayment({
             >
               Payment Amount
             </label>
+            <div className="flex w-full justify-between items-center rounded-[28px] min-h-[54px]  border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
             <input
               type="text"
               id="amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
-              className="outline-none w-full text-white min-h-[54px] rounded-[28px] border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]"
+              className="outline-none w-full text-white "
             />
+            <p className="flex gap-[8px] text-white/90 items-center">
+              <span>{currency}</span>
+              <span>
+                {exchangeRates.rates[currency as keyof typeof exchangeRates.rates]
+                ? currencyValue
+                : "Loading..."}
+              </span>
+            </p>
+            </div>
           </div>
           <div className="flex flex-col gap-[36px] w-full relative">
             <label
@@ -458,12 +468,7 @@ export default function MarchantPayment({
         </div>
         {amount && currency && (
           <div className="p-3 bg-transparent -mt-10 rounded-lg">
-            <p className="text-sm text-white">
-              NGN Equivalent: ₦
-              {exchangeRates.rates[currency as keyof typeof exchangeRates.rates]
-                ? NGNValue
-                : "Loading..."}
-            </p>
+           
             <p className="text-sm text-gray-500">
               Fee (0.5%):{" "}
               {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
@@ -528,7 +533,7 @@ export default function MarchantPayment({
           <QrCodeComponent
             Amount={transactionData?.amount || amount}
             label="Payment for goods/services"
-            ngnValue={transactionData?.ngnValue || NGNValue}
+            ngnValue={transactionData?.ngnValue || currencyValue}
             currency={transactionData?.currency || currency}
             transactionHash={transactionData?.transactionHash}
             paymentId={transactionData?.paymentId}

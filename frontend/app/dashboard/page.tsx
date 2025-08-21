@@ -9,6 +9,8 @@ import {
   Landmark,
   History,
   ArrowUpDown,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import MarchantPayment from "@/components/dashboard/marchant-payment/marchant-payment";
 import TransactionHistory from "@/components/dashboard/transactions.tsx/transaction-history";
@@ -58,6 +60,14 @@ export default function Dashboard() {
     {
       icon: <History size={25} color="white" className="stroke-3" />,
       name: "Transactions",
+    },
+     {
+      icon: <Settings size={25} color="white" className="stroke-3" />,
+      name: "Settings",
+    },
+     {
+      icon: <LogOut size={25} color="white" className="stroke-3" />,
+      name: "Log Out",
     },
   ];
 
