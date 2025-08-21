@@ -150,49 +150,52 @@ export default function SplitPayment() {
     setAmount("");
   };
 
-  const handleConfigureSplit = async () => {
-    console.log("address", address, contract);
-    if (!address || !contract) {
-      setError("Please connect your Starknet wallet and ensure contract is loaded");
-      return;
+const handleConfigureSplit = async () => {
+  console.log("address", connectedAddress,"contrsct", contract);
+  if (!connectedAddress || !contract) {
+    setError("Please connect your Starknet wallet and ensure contract is loaded");
+    return;
+  }
+
+  if (splits.length !== activeSplit) {
+    setError(`Exactly ${activeSplit} recipients are required`);
+    return;
+  }
+
+  const totalPercent = totalPercentage;
+  if (totalPercent !== 100) {
+    setError("Total percentage must equal 100%");
+    return;
+  }
+
+  try {
+    // Determine which function to call based on activeSplit
+    const functionName = `create_sme${activeSplit}`;
+    
+    // Build parameters dynamically
+    const params: any[] = [];
+    for (let i = 0; i < activeSplit; i++) {
+      params.push(splits[i].address);
+      params.push(parseInt(splits[i].amount));
     }
 
-    if (splits.length !== selectedSplit) {
-      setError(`Exactly ${activeSplit} recipients are required`);
+    const call = contract?.populate(functionName, params);
+    
+    if (!call) {
+      setError("Failed to populate contract call for SME creation.");
       return;
     }
-
-    const totalPercent = totalPercentage;
-    if (totalPercent !== 100) {
-      setError("Total percentage must equal 100%");
-      return;
-    }
-
-    try {
-      const call = contract?.populate("create_sme3", [
-        splits[0].address,
-        parseInt(splits[0].amount),
-        splits[1].address,
-        parseInt(splits[1].amount),
-        splits[2].address,
-        parseInt(splits[2].amount),
-      ]);
-      if (!call) {
-        setError("Failed to populate contract call for SME creation.");
-        return;
-      }
-      const result = await sendCreateSme3([call]);
-      const smeIdHex = result.transaction_hash;
-      setSmeId(smeIdHex);
-      setError("");
-      alert(
-        `SME configuration created successfully! Transaction Hash: ${smeIdHex}`
-      );
-      setTogglePayment(true);
-    } catch (err) {
-      setError("Failed to create SME configuration: " + (err as Error).message);
-    }
-  };
+    
+    const result = await sendCreateSme3([call]);
+    const smeIdHex = result.transaction_hash;
+    setSmeId(smeIdHex);
+    setError("");
+    alert(`SME configuration created successfully! Transaction Hash: ${smeIdHex}`);
+    setTogglePayment(true);
+  } catch (err) {
+    setError("Failed to create SME configuration: " + (err as Error).message);
+  }
+};
 
   const handleConfirmPayment = async (
     totalAmount: string,
@@ -228,6 +231,8 @@ export default function SplitPayment() {
     const low = (amountBN & (BigInt(Math.pow(2, 128)) - BigInt(1))).toString();
     const high = (amountBN >> BigInt(128)).toString();
 
+    const functionName = `distribute_sme${activeSplit}_payment`
+
     try {
       // Approve call
       const approveCall = {
@@ -239,7 +244,7 @@ export default function SplitPayment() {
       // Distribute call
       const distributeCall = {
         contractAddress: smeContractAddress,
-        entrypoint: "distribute_sme3_payment",
+        entrypoint: functionName,
         calldata: [low, high, tokenAddress],
       };
 

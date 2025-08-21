@@ -7,7 +7,7 @@ import { Contract, RpcProvider } from "starknet";
 import BecomeAMerchant from "./become-a-marchant";
 import { STARKPAY_ABI as MERCHANT_ABI } from "@/hooks/useStarkpayContract";
 
-const MERCHANT_ADDRESS = "0x04217b882eba5144fe47179d8c618eb75f0165ca5070d5e00a6ab586d32f23e6";
+const MERCHANT_ADDRESS = "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
 
 export default function DashboardHome() {
   const { account, address } = useAccount();
