@@ -159,7 +159,7 @@ export default function TokenSwap() {
           </div>
           <div className="flex flex-col gap-[18px] w-full">
             <div className="relative flex flex-col gap-[18px] w-full">
-              <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
+              <div className="border-[2px] rounded-[12px] w-full border-[#d7d3e533] bg-[#312E4266] flex-col xl:flex-row gap-[12px] flex justify-between p-[26px]">
                 <div className="flex flex-col gap-[16px]">
                   <h1 className="opacity-50 text-[#FBFBFB]">From</h1>
                   <div className="relative">
@@ -196,8 +196,8 @@ export default function TokenSwap() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end border gap-[16px]">
-                  <div className="flex text-white/90 text-[18px] border font-[500] items-center gap-[10px]">
+                <div className="flex flex-col xl:items-end  gap-[16px]">
+                  <div className="flex text-white/90 text-[18px]  font-[500] items-center gap-[10px]">
                     <span>
                       Balance: {balanceLoading ? "Loading..." : balances[fromCurrency as keyof typeof balances]} {fromCurrency}
                     </span>
@@ -207,7 +207,7 @@ export default function TokenSwap() {
                     placeholder="Enter amount"
                     value={amountIn}
                     onChange={(e) => setAmountIn(e.target.value)}
-                    className="text-[#FBFBFB] text-[24px] font-[500] text-end outline-none border-none bg-transparent"
+                    className="text-[#FBFBFB] text-[24px] font-[500] xl:text-end outline-none border-none bg-transparent"
                   />
                 </div>
               </div>
@@ -221,7 +221,7 @@ export default function TokenSwap() {
                 </button>
               </div>
 
-              <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] gap-[12px] flex justify-between p-[26px]">
+              <div className="border-[2px] rounded-[12px] w-full border-[#8F6DF533] bg-[#312E4266] flex-col xl:flex-row gap-[12px] flex justify-between p-[26px]">
                 <div className="flex flex-col gap-[16px]">
                   <h1 className="opacity-50 text-[#FBFBFB]">To</h1>
                   <div className="relative">
@@ -258,7 +258,7 @@ export default function TokenSwap() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-[16px]">
+                <div className="flex flex-col xl:items-end gap-[16px]">
                   <div className="flex text-white/90 text-[18px] font-[500] items-center gap-[10px]">
                     <span>
                       Balance: {balanceLoading ? "Loading..." : balances[toCurrency as keyof typeof balances]} {toCurrency}
@@ -269,7 +269,7 @@ export default function TokenSwap() {
                     placeholder="--"
                     value={estimatedOut}
                     disabled
-                    className="text-[#FBFBFB] text-[24px] font-[500] text-end outline-none border-none bg-transparent"
+                    className="text-[#FBFBFB] text-[24px] font-[500] xl:text-end outline-none border-none bg-transparent"
                   />
                 </div>
               </div>
