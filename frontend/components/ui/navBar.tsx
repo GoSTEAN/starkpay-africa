@@ -10,11 +10,12 @@ import Notifications from "./notification";
 import { useAccount } from "@starknet-react/core";
 import Image from "next/image";
 import useNotifications from "../providers/notification-provider";
+import ConnectWallet from "@/components/providers/wallet-connector";
 // import ThemeToggle from "./theme-button";
 
 export default function NavBar() {
   const [toggle, setToggle] = React.useState(false);
- 
+
   const navItems = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -23,15 +24,14 @@ export default function NavBar() {
     { name: "Contact", href: "/contact" },
   ];
 
-    const {
-          notifications,
-          addNotification,
-          markAsRead,
-          markAllAsRead,
-          removeNotification,
-          clearAll,
-      } = useNotifications();
-  
+  const {
+    notifications,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+  } = useNotifications();
 
   const { address: isLogedin } = useAccount();
 
@@ -42,7 +42,6 @@ export default function NavBar() {
   const handleSearch = () => {
     console.log("Search function triggered");
   };
-
 
   return (
     <div
@@ -83,7 +82,7 @@ export default function NavBar() {
         </div>
       ) : (
         <div
-          className={`w-fit hidden md:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] mx-auto border-white`}
+          className={`w-fit hidden lg:flex rounded-[30px] flex-none relative backdrop:blur-md items-center bg-white/10 p-[10px] border-l-[0.1px] mx-auto border-white`}
         >
           <div className="absolute inset-0 rounded-[30px] bg-white/10 backdrop-blur-lg pointer-events-none" />
           {navItems.map((item, index) => (
@@ -98,14 +97,14 @@ export default function NavBar() {
         </div>
       )}
 
-      {/* <div className="z-10 flex gap-5 items-center">
+      <div className="z-10 absolute right-8  lg:hidden flex gap-5 items-center">
         <div className="lg:hidden flex items-center justify-center">
           <button className="relative" onClick={() => setToggle(!toggle)}>
             <Bell className="h-5 w-5 text-[#8F6DF5]" />
             {notifications.filter((n) => !n.read).length > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs">
-                {notifications.filter((n) => !n.read).length > 9
-                  ? "9+"
+                {notifications.filter((n) => !n.read).length > 99
+                  ? "99+"
                   : notifications.filter((n) => !n.read).length}
               </span>
             )}
@@ -118,21 +117,20 @@ export default function NavBar() {
         >
           <Menu color="white" size={30} />
         </button>
-      </div> */}
+      </div>
       <div
         className={`flex w-fit gap-8 items-center pr-3 ${
           isLogedin ? "hidden" : "flex"
         }`}
       >
-        <div className={` hidden md:flex`}>
+        <div className={` hidden lg:flex`}>
           <WalletConnectorModal />
         </div>
 
-        {/* Mobile Notification Button */}
       </div>
 
       {/* Mobile Menu */}
-      <div className="flex w-full absolute z-10 md:hidden left-0 top-0">
+      <div className="flex w-full absolute z-10 lg:hidden left-0 top-0">
         <div className={`w-full ${toggle ? "flex" : "hidden"} justify-start`}>
           <div className="relative md:flex w-full items-center bg-white/10 p-[10px] border-b-[0.1px] border-white overflow-hidden">
             <div className="absolute inset-0 bg-white/10 backdrop-blur-lg pointer-events-none" />
@@ -216,10 +214,7 @@ export default function NavBar() {
                         </div>
                         <div className="p-3 text-center">
                           <button
-                            onClick={() => {
-                              // Here you would navigate to the full notifications page
-                              // or expand the dropdown to show all
-                            }}
+                            onClick={() => {}}
                             className="text-[#8F6DF5] text-sm"
                           >
                             View all notifications
@@ -243,12 +238,7 @@ export default function NavBar() {
                 ))}
 
                 <div className="flex w-full justify-end mt-2">
-                  <button
-                    type="button"
-                    className="py-[10px] px-[20px] lg:px-[31px] flex-none flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]"
-                  >
-                    connect wallet
-                  </button>
+                  <ConnectWallet />
                 </div>
               </div>
             )}
@@ -258,8 +248,3 @@ export default function NavBar() {
     </div>
   );
 }
-
-// <div>
-//   <Link href="/about">about</Link>
-//   <Link href="/sec">sec</Link>
-// </div>

@@ -33,7 +33,7 @@ const TOKEN_DECIMALS: { [key: string]: number } = {
 
 
 export default function SplitPayment() {
-  const [currency, setCurrency] = useState<string>("USDT");
+  const [currency, setCurrency] = useState<string>("STRK");
   const [toggle, setToggle] = useState<boolean>(false);
   const [address, setAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -242,7 +242,7 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
   const hasSplits: boolean = splits.length > 0;
 
   return (
-    <section className="relative rounded-[19px] py-[66px] w-full h-full border overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+    <section className="relative rounded-[19px] py-[66px] w-full h-full  overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat]  bg-[#212324]">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between items-start">
         <div className="flex flex-col gap-[8px] pb-[24px]">
           <h1 className="text-[32px] font-[600px] text-[#8F6DF5] font-[Montserrat]">
@@ -296,7 +296,7 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
                 <button
                   type="button"
                   onClick={handleToggle}
-                  className="text-white/70 cursor-pointer"
+                  className="text-white/70 cursor-pointer  py-[16px] px-[20px]"
                 >
                   {currency}
                 </button>

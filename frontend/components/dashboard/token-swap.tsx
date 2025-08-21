@@ -196,8 +196,8 @@ export default function TokenSwap() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-[16px]">
-                  <div className="flex text-white/90 text-[18px] font-[500] items-center gap-[10px]">
+                <div className="flex flex-col items-end border gap-[16px]">
+                  <div className="flex text-white/90 text-[18px] border font-[500] items-center gap-[10px]">
                     <span>
                       Balance: {balanceLoading ? "Loading..." : balances[fromCurrency as keyof typeof balances]} {fromCurrency}
                     </span>

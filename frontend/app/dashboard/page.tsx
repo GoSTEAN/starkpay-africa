@@ -89,7 +89,7 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="bg-[#212324] w-screen justify-between lg:gap-[50px] relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50px] lg:px-[200px]">
+      <div className="bg-[#212324] w-screen justify-between lg:gap-[50px] pt-25 relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50px] lg:px-[200px]">
         <SideNav tabs={tabs} setTab={setActiveTab} activeTab={activeTab} />
         <div className="w-full lg:max-w-[1296px] h-[850px] mt-20 items-start bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-2xl overflow-y-scroll">
           {activeTab === "Marchant pay" && (
