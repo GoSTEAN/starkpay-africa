@@ -21,28 +21,20 @@ import { useAccount } from "@starknet-react/core";
 import { useUserRole } from "@/hooks/getUserRole";
 import useGetBalance from "@/hooks/useGetBalance";
 
-interface Transctions {
-  id: number;
-  currency: string;
-  status: string;
-  timestamp: Date | string;
-  amount?: string;
-  category?: string;
-  type?: string;
-}
 
 interface DashboardProps {
-  transactions: Transctions[];
+  transactions: any[];
 }
 
 export default function DashboardHome({ transactions }: DashboardProps) {
-  const { account, address } = useAccount();
+const { account, address } = useAccount();
   const { role, loading, error, isMerchant } = useUserRole();
   const [showModal, setShowModal] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
   const [activeDuration, setActiveDration] = useState("Week");
-  const {
+  
+    const {
     balances,
     loading: balanceLoading,
     error: balanceError,
@@ -66,14 +58,15 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     );
   });
 
+
   const currencyFiltered = transactions.filter((tx) =>
     ["STRK", "USDT", "USDC", "NGN"].includes(tx.currency)
   );
 
-  const removeDuplicates = (transactions: Transctions[]) => {
-    const uniqueTransactions = new Map<number, Transctions>();
+  const removeDuplicates = (transactions: any) => {
+    const uniqueTransactions = new Map();
 
-    transactions.forEach((tx) => {
+    transactions.forEach((tx:any) => {
       const existingTx = uniqueTransactions.get(tx.id);
       if (
         !existingTx ||
@@ -82,6 +75,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
         uniqueTransactions.set(tx.id, tx);
       }
     });
+
 
     return Array.from(uniqueTransactions.values());
   };
@@ -94,7 +88,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
-  console.log(sortedTransactions);
+console.log(sortedTransactions);
   const accNo = "0234567890";
   const amount = "12,000,500";
   const img = "/user.jpg";
@@ -108,8 +102,8 @@ export default function DashboardHome({ transactions }: DashboardProps) {
 
   const thead = ["Name", "Amount", "Date", "Status"];
   const duration = ["All", "Week", "Months"];
-
-  return (
+  
+ return (
     <section className="relative rounded-[19px] items-center py-[66px] w-full h-full  bg-[#212324] overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px]">
       <div className="w-full h-full flex flex-col gap-[32px]  overflow-y-scroll">
         <div className="flex flex-col gap-[8px] ">
@@ -366,4 +360,5 @@ export default function DashboardHome({ transactions }: DashboardProps) {
       </div>
     </section>
   );
-}
+
+  }
