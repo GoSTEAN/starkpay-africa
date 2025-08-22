@@ -22,7 +22,6 @@ import TokenSwap from "@/components/dashboard/token-swap";
 import ProtectedRoute from "@/context/protectedRoute";
 import useNotifications from "@/components/providers/notification-provider";
 import Logout from "@/components/dashboard/logout";
-// import Notifications from "@/components/ui/notification";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Home");
@@ -31,10 +30,6 @@ export default function Dashboard() {
   const {
     notifications,
     addNotification,
-    markAsRead,
-    markAllAsRead,
-    removeNotification,
-    clearAll,
   } = useNotifications();
 
   const tabs = [
