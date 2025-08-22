@@ -233,12 +233,12 @@ export default function DashboardHome() {
               </div>
             </div>
 
-            <div className=" w-full max-[852px] h-auto p-[32px] font-[Open Sans] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90  border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col">
+            <div className=" w-full max-[852px] overflow-scroll h-auto p-[32px] font-[Open Sans] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90  border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col">
               <table className="w-full flex flex-col gap-[24px]">
                 <thead className="text-[#8F6DF5] font-[400px] font-[Open Sans] flex flex-col gap-[24px] lg:text-[16px] text-[14px] border-b-[1px] border-[#FBFBFB1A]   w-full">
                   <tr className="flex items-center gap-[48px] pb-[16px] ">
                     {thead?.map((td, id) => (
-                      <td className={`w-full ${id > 0 ? "lg:w-[30%]" : "w-full"}`} key={id}>
+                      <td className={`w-full truncate ${id > 0 ? "lg:w-[30%]" : "w-full"}`} key={id}>
                         {td}
                       </td>
                     ))}
@@ -250,9 +250,9 @@ export default function DashboardHome() {
                       key={id}
                       className="flex hover:bg-[#FBFBFB1A]/20 transition-all duration-300 items-center gap-[48px]  pb-[5] border-b border-[#FBFBFB1A] "
                     >
-                      <td className="w-full flex">
+                      <td className="w-full flex truncate">
                         <div className="flex overflow-x-scroll gap-[8px] items-center justify-center">
-                          <div className="w-[30px] flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
+                          <div className="w-[30px] flex-none flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
                             {img ? (
                               <Image
                                 src={img}
@@ -273,9 +273,9 @@ export default function DashboardHome() {
                           </h1>
                         </div>
                       </td>
-                      <td className="w-full lg:w-[30%]">${td.amount}</td>
-                      <td className="w-full lg:w-[30%]">{td.date}</td>
-                      <td className="w-full lg:w-[30%] flex gap-[6px] p-[6px_14px] items-center text-start justify-start bg-[#FBFBFB12] rounded-[30px]"><span>{td.status === "In progress"? <RotateCcw /> : ""}</span> <span>{td.status === "Warning"? <TriangleAlert /> : ""}</span> <span>{td.status === "Done"? <CircleCheck /> : ""}</span><span>{td.status}</span></td>
+                      <td className="w-full lg:w-[30%] truncate">${td.amount}</td>
+                      <td className="w-full lg:w-[30%] truncate">{td.date}</td>
+                      <td className="w-full lg:w-[30%] truncate flex gap-[6px] p-[6px_14px] items-center text-start justify-start bg-[#FBFBFB12] rounded-[30px]"><span>{td.status === "In progress"? <RotateCcw /> : ""}</span> <span>{td.status === "Warning"? <TriangleAlert /> : ""}</span> <span>{td.status === "Done"? <CircleCheck /> : ""}</span><span>{td.status}</span></td>
                     </tr>
                   ))}
                 </tbody>

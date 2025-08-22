@@ -9,7 +9,7 @@ interface Qrcodeprops {
   settoggle: React.Dispatch<React.SetStateAction<boolean>>
   Amount: number | string
   currency: string
-  ngnValue: string
+  CurrencyValue: string
   label: string
   transactionHash: string
   paymentId: string
@@ -22,7 +22,7 @@ export default function QrCodComponent({
   Amount,
   currency,
   label,
-  ngnValue,
+  CurrencyValue,
   transactionHash,
   paymentId,
   transactionStatus,
@@ -61,21 +61,9 @@ export default function QrCodComponent({
     <div
       className={`" rounded-[19px] relative z-10  py-[46px] gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px]  bg-[#212324] w-full h-full "`}
     >
-      <div className="flex flex-col gap-[22px]">
-        <p className="text-[#FBFBFB] text-[20px] font-[400]">
-          Accepting USDC, USDT,or STRK payments from customers using QR codes
-        </p>
-        {statusDisplay && (
-          <div className={`flex items-center gap-3 p-4 rounded-lg ${statusDisplay.bgColor}`}>
-            {statusDisplay.icon}
-            <span className={`font-semibold ${statusDisplay.textColor}`}>{statusDisplay.text}</span>
-          </div>
-        )}
-      </div>
-
       <div className="flex flex-col  gap-8 w-full h-full">
         <div className="w-full h-full justify-center flex flex-col items-center gap-[20px]">
-          <div className="sm:w-full max-w-[400px] sm:h-full w-[300px] h-[300px]  overflow-hidden max-h-[400px] relative  p-5 rounded-[20px]">
+          <div className="sm:w-full max-w-[400px] sm:h-full w-[221px] h-[223px]  overflow-hidden max-h-[400px] relative  p-5 rounded-[20px]">
             <Image src={qrcode || "/placeholder.svg"} alt="Paymant Qr Code" fill />
           </div>
           {transactionStatus === "pending" && (
@@ -86,18 +74,15 @@ export default function QrCodComponent({
           )}
           {transactionStatus === "failed" && <p className="text-red-400 font-[500] text-[18px]">Payment Failed</p>}
         </div>
-        <div className="flex  gap-2 w-full items-center justify-center">
-          <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px] text-[18px] font-[500]">
-            Amount: {Amount}
+        <div className="flex  gap-[20px] w-full items-center justify-center">
+          <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
+            {currency}: {CurrencyValue}
           </h1>
-          <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
+          <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
             Token: {currency}
           </h1>
-          <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
-            Payment ID: {paymentId}
-          </h1>
-          <h1 className="bg-[#8F6DF5B2]/70 text-[#FBFBFB] rounded-[42px] px-[24px] py-[10px]  text-[18px] font-[500]">
-            NGN Value: {ngnValue}
+          <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
+            NGN Value: {Amount}
           </h1>
         </div>
       </div>

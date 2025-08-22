@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { ChevronDown, QrCode, Eye } from "lucide-react";
+import { ChevronDown, QrCode, Eye, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import QRCodeLib from "qrcode";
 import QrCodeComponent from "./qr-code";
@@ -34,6 +34,8 @@ interface MerchantPaymentProps {
   onTransaction: (transaction: any) => void;
   addNotification: (notification: any) => void;
 }
+
+type Status = "pending" | "completed" | "in_progress";
 
 export default function MarchantPayment({
   onTransaction,
@@ -239,7 +241,7 @@ export default function MarchantPayment({
     const rate =
       exchangeRates.rates[currency as keyof typeof exchangeRates.rates];
     if (rate === null || rate === undefined) return "Loading...";
-    return (parsedAmount * Number(rate)).toLocaleString();
+    return (parsedAmount / Number(rate)).toLocaleString();
   }, [amount, currency, exchangeRates]);
 
   const generateQR = async (e: React.FormEvent) => {
@@ -285,10 +287,10 @@ export default function MarchantPayment({
 
       // Prepare contract call
       const call = contract.populate("create_payment", [
-        walletAddress, // receiver
-        amountU256, // amount (u256)
-        TOKEN_ADDRESSES[currency], // token
-        "Payment for goods/services", // remarks
+        walletAddress,
+        amountU256,
+        TOKEN_ADDRESSES[currency],
+        "Payment for goods/services",
       ]);
 
       // Send transaction
@@ -303,7 +305,7 @@ export default function MarchantPayment({
       // Create payment data for QR code
       const paymentData = {
         recipient: walletAddress,
-        amount: amount,
+        amount: currencyValue,
         currency: currency,
         paymentId: paymentId,
       };
@@ -317,15 +319,15 @@ export default function MarchantPayment({
       const transaction = {
         id: Date.now(),
         type: "qr_payment",
-        amount: parsedAmount,
+        amount: currencyValue,
         currency,
         status: "pending",
         timestamp: new Date(),
-        ngnValue: currencyValue,
+        ngnValue: amount,
         transactionHash: transactionHash,
         paymentId: paymentId,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000),
-        qrCodeData: qrCodeDataURL, 
+        qrCodeData: qrCodeDataURL,
       };
 
       // Update state
@@ -382,9 +384,46 @@ export default function MarchantPayment({
       }
     }
   };
+  type Status = "pending" | "completed" | "in_progress";
 
+  const stat: Status = "pending";
+  const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
   return (
-    <div className="relative rounded-[19px] py-[66px] h-full overflow-y-scroll gap-[22px] flex flex-col justify-between font-[Montserrat] px-[32px] bg-transparent">
+    <div className="relative rounded-[19px] w-full  max-w-[1000px] h-full overflow-y-scroll gap-[32px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+      <div className="gap-[8px] justify-between w-full items-center hidden md:flex">
+        {steps.map((step, index) => (
+          <div key={index} className="flex w-full flex-col gap-[6px] ">
+            <div className="flex gap-[3px] items-center">
+              <span
+                className={`w-[36.0510196685791px] flex-none h-[36.0510196685791px] flex items-center justify-center text-center text-white rounded-[64px] border-[0.5px] ${
+                  stat === "pending" || stat === "completed"
+                    ? "bg-[#8F6DF5]"
+                    : "bg-transparent"
+                } border-[#493E71]`}
+              >
+                {stat === "pending" ? (
+                  <span> 0{index + 1}</span>
+                ) : (
+                  <ShieldCheck color="white" />
+                )}
+              </span>
+              {index < 3 && (
+                <span
+                  className={`w-full h-[1px]  ${
+                    stat === "pending" || stat === "completed"
+                      ? "bg-[#8F6DF5]"
+                      : "bg-[#493E71]"
+                  }`}
+                ></span>
+              )}
+            </div>
+            <div className="font-[400] text-white">step {index + 1}</div>
+            <div className="font-[600] text-white">{step}</div>
+            <div className="font-[400] text-[#8F6DF5]">{stat}</div>
+          </div>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-[22px]">
         <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
           Generate Payment QR Code
@@ -399,7 +438,7 @@ export default function MarchantPayment({
         )}
       </div>
 
-      <div className="flex flex-col justify-center gap-[36px]">
+      <div className="flex flex-col w-full justify-center p-[32px] relative gap-[36px] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-[19px] border border-[#FBFBFB1F]">
         <div className="flex flex-col  gap-[36px]">
           <div className="flex flex-col gap-[36px] w-full">
             <label
@@ -409,22 +448,25 @@ export default function MarchantPayment({
               Payment Amount
             </label>
             <div className="flex w-full justify-between items-center rounded-[28px] min-h-[54px]  border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
-            <input
-              type="text"
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="outline-none w-full text-white "
-            />
-            <p className="flex gap-[8px] text-white/90 items-center">
-              <span>{currency}</span>
-              <span>
-                {exchangeRates.rates[currency as keyof typeof exchangeRates.rates]
-                ? currencyValue
-                : "Loading..."}
-              </span>
-            </p>
+              <span className="text-white pr-1">N</span>
+              <input
+                type="text"
+                id="amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="outline-none w-full text-white "
+              />
+              <p className="flex gap-[8px] text-white/90 items-center">
+                <span>{currency}</span>
+                <span>
+                  {exchangeRates.rates[
+                    currency as keyof typeof exchangeRates.rates
+                  ]
+                    ? currencyValue
+                    : "Loading..."}
+                </span>
+              </p>
             </div>
           </div>
           <div className="flex flex-col gap-[36px] w-full relative">
@@ -468,7 +510,6 @@ export default function MarchantPayment({
         </div>
         {amount && currency && (
           <div className="p-3 bg-transparent -mt-10 rounded-lg">
-           
             <p className="text-sm text-gray-500">
               Fee (0.5%):{" "}
               {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
@@ -485,14 +526,58 @@ export default function MarchantPayment({
             </p>
           </div>
         )}
-      </div>
+        {error && (
+          <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
+            {error}
+          </div>
+        )}
 
-      {error && (
-        <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
-          {error}
+        <div className="w-full bg-[#515151] overflow-hidden rounded-[48px]">
+          <button
+            type="button"
+            onClick={generateQR}
+            disabled={!amount || !currency || isGenerating}
+            className={`flex gap-[10px] justify-center items-center w-full p-[21px] ${
+              !amount || !currency || isGenerating
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-[#493E71]"
+            }`}
+          >
+            <QrCode color="#FBFBFB" size={40} />
+            <span className="text-[20px] font-[600] text-[#FBFBFB]">
+              {isGenerating ? "Generating..." : "Generate Payment QR"}
+            </span>
+          </button>
         </div>
-      )}
 
+        <div className="w-full text-[#FBFBFB] text-[16px] font-[400] flex justify-start gap-[12px]">
+          <span>Transaction fee:</span>
+          <span>0.5%</span>
+        </div>
+
+        {qrModalOpen && qrCode && (
+          <div className="absolute top-0 left-0 w-full h-full ">
+            <div className="absolute inset-0 bg-transparent backdrop-blur-lg" />
+            <QrCodeComponent
+              Amount={transactionData?.amount || amount}
+              label="Payment for goods/services"
+              CurrencyValue={transactionData?.ngnValue || currencyValue}
+              currency={transactionData?.currency || currency}
+              transactionHash={transactionData?.transactionHash}
+              paymentId={transactionData?.paymentId}
+              transactionStatus={transactionStatus}
+              settoggle={(value) => {
+                setQrModalOpen(value);
+                if (!value) {
+                  setHasViewed(true);
+                  setTransactionStatus(null);
+                }
+              }}
+              qrcode={qrCode}
+            />
+          </div>
+        )}
+      </div>
       {qrCode && hasViewed && !toggle && (
         <button
           type="button"
@@ -502,52 +587,6 @@ export default function MarchantPayment({
           View
           <Eye color="white" size={20} />
         </button>
-      )}
-
-      <div className="w-full rounded-[10px] bg-[#FBFBFB12]/40">
-        <button
-          type="button"
-          onClick={generateQR}
-          disabled={!amount || !currency || isGenerating}
-          className={`flex gap-[10px] justify-center items-center w-full p-[21px] ${
-            !amount || !currency || isGenerating
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-[#FBFBFB12]/30"
-          }`}
-        >
-          <QrCode color="#FBFBFB" size={40} />
-          <span className="text-[20px] font-[600] text-[#FBFBFB]">
-            {isGenerating ? "Generating..." : "Generate Payment QR"}
-          </span>
-        </button>
-      </div>
-
-      <div className="w-full text-[#FBFBFB] text-[16px] font-[400] flex justify-start gap-[12px]">
-        <span>Transaction fee:</span>
-        <span>0.5%</span>
-      </div>
-
-      {qrModalOpen && qrCode && (
-        <div className="absolute top-0 left-0 w-full h-full ">
-          <div className="absolute inset-0 bg-transparent backdrop-blur-lg" />
-          <QrCodeComponent
-            Amount={transactionData?.amount || amount}
-            label="Payment for goods/services"
-            ngnValue={transactionData?.ngnValue || currencyValue}
-            currency={transactionData?.currency || currency}
-            transactionHash={transactionData?.transactionHash}
-            paymentId={transactionData?.paymentId}
-            transactionStatus={transactionStatus}
-            settoggle={(value) => {
-              setQrModalOpen(value);
-              if (!value) {
-                setHasViewed(true);
-                setTransactionStatus(null);
-              }
-            }}
-            qrcode={qrCode}
-          />
-        </div>
       )}
     </div>
   );

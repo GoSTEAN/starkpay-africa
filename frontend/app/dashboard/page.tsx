@@ -21,6 +21,7 @@ import NGNWithdrawal from "@/components/dashboard/withdrawal/NgnWithdrawal";
 import TokenSwap from "@/components/dashboard/token-swap";
 import ProtectedRoute from "@/context/protectedRoute";
 import useNotifications from "@/components/providers/notification-provider";
+import Logout from "@/components/dashboard/logout";
 // import Notifications from "@/components/ui/notification";
 
 export default function Dashboard() {
@@ -101,7 +102,7 @@ export default function Dashboard() {
     <ProtectedRoute>
       <div className="bg-[#212324] w-screen justify-between lg:gap-[50px] pt-25 relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50px] lg:px-[200px]">
         <SideNav tabs={tabs} setTab={setActiveTab} activeTab={activeTab} />
-        <div className="w-full lg:max-w-[1296px] h-[850px] mt-20 items-start bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-2xl overflow-y-scroll">
+        <div className="w-full  h-full  items-start flex justify-center rounded-2xl overflow-y-scroll">
           {activeTab === "Marchant pay" && (
             <MarchantPayment
               onTransaction={addTransaction}
@@ -123,6 +124,7 @@ export default function Dashboard() {
           {activeTab === "Home" && <DashboardHome />}
           {activeTab === "Payment split" && <SplitPayment />}
           {activeTab === "Swap" && <TokenSwap />}
+          {activeTab === "Log Out" && <Logout />}
         </div>
         {Status && Type && (
           <div className="absolute top-0 left-0 w-full h-full z-10">

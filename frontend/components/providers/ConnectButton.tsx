@@ -86,7 +86,7 @@ export default function ConnectButton({ onShowRegister, contract }: ConnectButto
           className="py-[10px] cursor-pointer relative px-[31px] w-fit text-white text-[18px] font-[700] flex items-center justify-center bg-[#FBFBFB12] shadow-[inset_2px_4px_40px_0px_#FFFFFF1A,inset_0px_-2px_9px_0px_#FFFFFF59] rounded-[50px]"
         >
           <div className="text-white flex flex-none font-[500] text-center sm:text-base transform">
-            Conn - {address?.slice(0, 4)}...{address?.slice(-2)}
+            Disconnect
           </div>
         </button>
       )}

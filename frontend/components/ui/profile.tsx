@@ -7,7 +7,7 @@ export default function Profile() {
   const [toggle, setToggle] = useState(false)
 
   const accNo = "8101842464";
-  const verified = false;
+  const verified = true;
 
   const handleToggle = () => {
     setToggle(!toggle)
@@ -17,10 +17,10 @@ export default function Profile() {
       <div className="flex items-center gap-[8px]">
         {verified ? (
           <>
-            <span className="text-[#8F6DF5] text-16px font-[400] flex flex-none">
+            <span className="text-[#4A6CE8] text-16px font-[400] flex flex-none">
               verified
             </span>
-            <ShieldCheck color="#8F6DF5" size={25} />
+            <ShieldCheck color="#4A6CE8" size={25} />
             <p className="text-[18px]">{accNo}</p>
           </>
         ) : (

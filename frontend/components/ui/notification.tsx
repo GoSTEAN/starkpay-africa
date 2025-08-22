@@ -114,7 +114,7 @@ export default function Notifications({
   return (
     <div
       ref={dropdownRef}
-      className="w-fit flex items-center p-[10px] relative h-fit text-[18px] font-[400] opacity-100 gap-[16px] rounded-[60px] bg-transparent shadow-[inset_3px_4px_2px_-1px_rgba(0,0,0,0.23),inset_-5px_-5px_4px_-5px_rgba(251,251,251,0.06)]"
+      className="w-fit  flex items-center p-[10px] relative h-fit text-[18px] font-[400] opacity-100 gap-[16px] rounded-[60px] bg-transparent shadow-[inset_3px_4px_2px_-1px_rgba(0,0,0,0.23),inset_-5px_-5px_4px_-5px_rgba(251,251,251,0.06)]"
     >
       <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} className="relative group">
         {notifications.filter((n) => !n.read).length > 0 ? (
@@ -132,30 +132,31 @@ export default function Notifications({
       </Button>
 
       {isOpen && (
-        <Card className="absolute right-0 top-full mt-2 w-80 max-h-[500px] shadow-lg border border-[#8F6DF5]/20 bg-background backdrop-blur-sm z-50">
+        <Card className="absolute right-0 top-full mt-2 w-80 max-h-[500px] lg:w-[432px] shadow-lg border border-[#8F6DF5]/20 bg-[#8F6DF51F] backdrop-blur-sm z-50">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center text-foreground">
-                <Bell className="mr-2 text-[#8F6DF5]" />
                 Notifications
               </CardTitle>
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsOpen(false)}
-                  className="text-foreground hover:bg-[#8F6DF5]/10"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
+              
+            {notifications.filter((n) => !n.read).length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onMarkAllAsRead}
+                    className="text-foreground hover:bg-[#8F6DF5]/10"
+                    title="Mark all as read"
+                  >
+                   Mark all as read
+                  </Button>
+                )}
             </div>
-            <CardDescription className="text-[#8F6DF5]">Recent activities</CardDescription>
+            {/* <CardDescription className="text-[#8F6DF5]">Recent activities</CardDescription> */}
           </CardHeader>
 
           <div className="px-4 pb-3">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center w-full justify-between mb-3">
+              {/* <div className="flex items-center space-x-2">
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
@@ -167,30 +168,21 @@ export default function Notifications({
                     </option>
                   ))}
                 </select>
-              </div>
-              <div className="flex items-center space-x-1">
-                {notifications.filter((n) => !n.read).length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onMarkAllAsRead}
-                    className="text-foreground hover:bg-[#8F6DF5]/10"
-                    title="Mark all as read"
-                  >
-                    <CheckCheck className="w-4 h-4" />
-                  </Button>
-                )}
+              </div> */}
+              <div className="flex items- justify-between w-full space-x-1">
+              
                 {notifications.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onClearAll}
-                    className="text-foreground hover:bg-[#8F6DF5]/10"
+                    className="text-foreground absolute bottom-2 right-2 hover:bg-[#8F6DF5]/10"
                     title="Clear all"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 )}
+                  
               </div>
             </div>
             <Separator className="bg-[#8F6DF5]/20" />
