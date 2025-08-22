@@ -22,7 +22,7 @@ interface Split {
 
 // Token contract addresses (replace with actual Starknet addresses)
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: tokenAddress.USDT,
+  USDT: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
   USDC: tokenAddress.USDC,
   STRK: tokenAddress.STRK,
 };

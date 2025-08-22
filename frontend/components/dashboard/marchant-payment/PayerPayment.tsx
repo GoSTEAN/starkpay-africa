@@ -10,7 +10,7 @@ import { Html5QrcodeScanner } from "html5-qrcode/cjs/html5-qrcode-scanner.js";
 
 // Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: tokenAddress.USDT,
+  USDT: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
   USDC: tokenAddress.USDC,
   STRK: tokenAddress.STRK,
 };
@@ -39,8 +39,11 @@ export default function PayerPayment() {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const scannerContainerRef = useRef<HTMLDivElement>(null);
 
+  const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if(!url) return
+
   const provider = new RpcProvider({
-    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+    nodeUrl: url,
   });
 
   useEffect(() => {

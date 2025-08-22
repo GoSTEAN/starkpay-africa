@@ -25,9 +25,11 @@ export default function Register({ onRegister, isRegistering, contract, address,
       setLocalIsRegistering(true);
       const call = contract.populate("register", [address, isMerchant ? 1 : 0]);
       const response = await account.execute(call);
-      
+      const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if(!url) return
+
       // Wait for transaction confirmation
-      const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "https://starknet-sepolia.public.blastapi.io";
+      const RPC_URL = url;
       await new RpcProvider({ nodeUrl: RPC_URL }).waitForTransaction(response.transaction_hash, {
         retryInterval: 1000,
         successStates: ["ACCEPTED_ON_L2"],

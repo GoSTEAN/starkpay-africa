@@ -28,7 +28,7 @@ interface DashboardProps {
 
 export default function DashboardHome({ transactions }: DashboardProps) {
 const { account, address } = useAccount();
-  const { role, loading, error, isMerchant } = useUserRole();
+  // const { role, loading, error, isMerchant } = useUserRole();
   const [showModal, setShowModal] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");

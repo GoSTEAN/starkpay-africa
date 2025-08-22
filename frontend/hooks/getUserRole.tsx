@@ -9,25 +9,24 @@ export function useUserRole() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || 
-    "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
-  const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  const RPC_URL =
+    process.env.NEXT_PUBLIC_RPC_URL ||
     "https://starknet-sepolia.public.blastapi.io";
 
   const checkUserRole = async () => {
-    if (!address) {
+    if (!address || !contractAddress) {
       setRole(null);
       return;
     }
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const provider = new RpcProvider({ nodeUrl: RPC_URL });
       const contract = new Contract(STARKPAY_ABI, contractAddress, provider);
-      
-      // Returns u8 number according to ABI
+
       const roleNumber = await contract.get_user_role(address);
       setRole(Number(roleNumber));
     } catch (err) {
@@ -39,18 +38,19 @@ export function useUserRole() {
     }
   };
 
-    useEffect(() => {
-      checkUserRole();
-      const interval = setInterval(checkUserRole, 300000);
-      return () => clearInterval(interval);
-    }, [address]);
+  useEffect(() => {
+    checkUserRole();
+    const interval = setInterval(checkUserRole, 300000);
+    return () => clearInterval(interval);
+  }, [address]);
 
-  return { 
+  // ✅ Always return the same object shape
+  return {
     role,
-    isMerchant: role === 1, 
-    isUser: role === 0,  
-    loading, 
-    error, 
-    refresh: checkUserRole 
+    isMerchant: role === 1,
+    isUser: role === 0,
+    loading,
+    error,
+    refresh: checkUserRole,
   };
 }

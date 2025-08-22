@@ -16,9 +16,8 @@ import { Contract, RpcProvider } from "starknet";
 import BecomeAMerchant from "../dashboard/home/become-a-marchant";
 import { STARKPAY_ABI as MERCHANT_ABI } from "@/hooks/useStarkpayContract";
 
-const MERCHANT_ADDRESS =
-  "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
 
+  
 export default function ProfilePage() {
   const { account, address } = useAccount();
   const { role, loading, error, isMerchant } = useUserRole();
@@ -26,8 +25,15 @@ export default function ProfilePage() {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
 
+  const MERCHANT_ADDRESS =
+  "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
+
+  
+  const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if(!url) return
+
   const provider = new RpcProvider({
-    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+    nodeUrl: url,
   });
 
   // if (loading)
@@ -69,7 +75,7 @@ export default function ProfilePage() {
       }
       const result = await contract.invoke("become_merchant", [], {
         maxFee: "0x0",
-      }); // Explicitly invoke with maxFee
+      }); 
       console.log("Become merchant result:", result);
       await provider.waitForTransaction(result.transaction_hash);
       alert("Successfully registered as a merchant! Refreshing page...");

@@ -7,7 +7,7 @@ import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 const TOKEN_ADDRESSES = {
   STRK: tokenAddress.STRK,
   USDC: tokenAddress.USDC,
-  USDT: tokenAddress.USDT,
+  USDT: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
 };
 
 // Token decimals for formatting
@@ -43,8 +43,13 @@ export default function useGetBalance(): UseGetBalanceReturn {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if (!url) {
+    console.log("fail to fetch RPC URL");
+  }
+
   const provider = new RpcProvider({
-    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+    nodeUrl: url,
   });
 
   const fetchBalances = async () => {

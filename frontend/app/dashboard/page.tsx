@@ -11,6 +11,7 @@ import {
   ArrowUpDown,
   Settings,
   LogOut,
+  User,
 } from "lucide-react";
 import MarchantPayment from "@/components/dashboard/marchant-payment/marchant-payment";
 import TransactionHistory from "@/components/dashboard/transactions.tsx/transaction-history";
@@ -22,6 +23,7 @@ import TokenSwap from "@/components/dashboard/token-swap";
 import ProtectedRoute from "@/context/protectedRoute";
 import useNotifications from "@/components/providers/notification-provider";
 import Logout from "@/components/dashboard/logout";
+import ProfilePage from "@/components/ui/profilePage";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Home");
@@ -64,6 +66,10 @@ export default function Dashboard() {
      {
       icon: <LogOut size={25} color="white" className="stroke-3" />,
       name: "Log Out",
+    },
+    {
+      icon: <User size={25} color="white" className="stroke-3" />,
+      name: "Profile",
     },
   ];
 
@@ -122,6 +128,7 @@ console.log(notifications)
           {activeTab === "Payment split" && <SplitPayment />}
           {activeTab === "Swap" && <TokenSwap />}
           {activeTab === "Log Out" && <Logout />}
+          {activeTab === "Profile" && <ProfilePage />}
         </div>
         {Status && Type && (
           <div className="absolute top-0 left-0 w-full h-full z-10">

@@ -20,7 +20,7 @@ export default function ConnectWallet() {
   if (!contractAddress) {
     throw new Error("Contract address is not set in environment variables");
   }
-  const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "https://starknet-sepolia.public.blastapi.io";
+  const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "";
 
   // Handle contract setup
   useEffect(() => {

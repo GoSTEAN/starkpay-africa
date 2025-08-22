@@ -12,7 +12,7 @@ console.log("AutoSwap Contract Address:", AUTO_SWAPP_CONTRACT_ADDRESS);
 const TOKEN_DECIMALS = {
   [SDK_TOKEN_ADDRESSES.STRK]: 18,
   [SDK_TOKEN_ADDRESSES.USDC]: 6,
-  [SDK_TOKEN_ADDRESSES.USDT]: 6,
+  ["0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8"]: 6,
 };
 
 export default function TokenSwap() {
@@ -33,10 +33,13 @@ export default function TokenSwap() {
   return
 }
   
+const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if(!url) return
+
   // Initialize AutoSwappr SDK
   const autoswappr = new AutoSwappr({
     contractAddress: AUTO_SWAPP_CONTRACT_ADDRESS,
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://starknet-sepolia.public.blastapi.io",
+    rpcUrl: url,
     accountAddress: address || "",
     privateKey: "",
   });

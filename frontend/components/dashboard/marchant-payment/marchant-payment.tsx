@@ -8,19 +8,22 @@ import QRCodeLib from "qrcode";
 import QrCodeComponent from "./qr-code";
 import { useMemo } from "react";
 import useExchangeRates from "@/hooks/useExchangeRate";
+import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 import {
   useAccount,
   useContract,
   useSendTransaction,
+  useNetwork,
 } from "@starknet-react/core";
 import { RpcProvider } from "starknet";
 import { STARKPAY_ABI as paymentAbi } from "@/hooks/useStarkpayContract";
+import { useStarkpayEventListener } from "@/hooks/useStarkpayEventListener";
 
-// Token contract addresses
+// Token contract addresses for Sepolia testnet
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: "0x068f5c6a61730768477ced7eef7680a434a851905eeff58ee8ba2115ada38e3",
-  USDC: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-  STRK: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+  USDT: "0x03e6b47c2f86d62a0e14a9f5e54d696b8f8d982ce398b0189b385aa50b2ed7a8",
+  USDC: tokenAddress.STRK,
+  STRK: tokenAddress.USDC,
 };
 
 // Token decimals for u256 conversion
@@ -59,16 +62,56 @@ export default function MarchantPayment({
   const currencies = ["USDT", "USDC", "STRK"] as const;
   const exchangeRates = useExchangeRates();
   const { address: walletAddress, status } = useAccount();
- const [stepsStatus, setStepsStatus] = useState<Status[]>([
+  const { chain } = useNetwork();
+  const [stepsStatus, setStepsStatus] = useState<Status[]>([
     "pending",
     "pending",
     "pending",
     "pending",
   ]);
 
+  // Check network
+  useEffect(() => {
+    if (chain.network !== "sepolia") {
+      addNotification({
+        id: Date.now(),
+        type: "error",
+        title: "Network Error",
+        message: "Please switch to Starknet Sepolia testnet",
+        timestamp: new Date(),
+        read: false,
+        category: "system",
+      });
+    }
+  }, [chain, addNotification]);
+
+  // Event listener for PaymentRequestCreated and PaymentReceived
+  const { events, isListening } = useStarkpayEventListener(
+    addNotification,
+    (updatedTx) => {
+      // Update pendingTransactions when an event updates the status
+      setPendingTransactions((prev) =>
+        prev.map((tx) => (tx.paymentId === updatedTx.paymentId ? updatedTx : tx))
+      );
+      // Update current transaction status if it matches
+      if (transactionData?.paymentId === updatedTx.paymentId) {
+        setTransactionStatus(updatedTx.status);
+      }
+      onTransaction(updatedTx);
+    },
+    pendingTransactions
+  );
+
+  const url = process.env.NEXT_PUBLIC_RPC_URL;
+  if (!url) return;
+
   const provider = new RpcProvider({
-    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+    nodeUrl: url,
   });
+
+  console.log(tokenAddress.USDT);
+  console.log(tokenAddress.STRK);
+  console.log(tokenAddress.USDC);
 
   // Contract address
   let contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -395,41 +438,41 @@ export default function MarchantPayment({
       }
     }
   };
-  
-    useEffect(() => {
+
+  useEffect(() => {
     const newStatus: Status[] = ["pending", "pending", "pending", "pending"];
-    
+
     if (amount) {
       newStatus[0] = "completed";
       newStatus[1] = "in_progress";
     }
-    
+
     if (amount && currency) {
       newStatus[1] = "completed";
       newStatus[2] = "in_progress";
     }
-    
+
     if (qrCode) {
       newStatus[2] = "completed";
       newStatus[3] = "in_progress";
     }
-    
+
     if (transactionStatus === "success") {
       newStatus[3] = "completed";
     }
-    
+
     setStepsStatus(newStatus);
   }, [amount, currency, qrCode, transactionStatus]);
 
   type Status = "pending" | "completed" | "in_progress";
 
   const stat: Status = "pending";
-    const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
+  const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
 
   return (
     <div className="relative rounded-[19px] w-full pt-10 max-w-[1000px] h-full overflow-y-scroll gap-[32px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="gap-[8px] justify-between w-full items-center hidden md:flex">
-         {steps.map((step, index) => (
+        {steps.map((step, index) => (
           <div key={index} className="flex w-full flex-col gap-[6px] ">
             <div className="flex gap-[3px] items-center">
               <span
@@ -464,139 +507,137 @@ export default function MarchantPayment({
         ))}
       </div>
 
-      
-
       <div className={`flex flex-col w-full justify-center gap-[32px] relative`}>
-       <div className="flex flex-col gap-[22px]">
-        <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
-          Generate Payment QR Code
-        </h1>
-        <p className="text-[#FBFBFB] text-[20px] font-[400]">
-          Accepting USDC, USDT, or STRK payments from customers using QR codes
-        </p>
-        {!walletAddress && (
-          <p className="text-red-500 text-sm">
-            Please connect your Starknet wallet to proceed
+        <div className="flex flex-col gap-[22px]">
+          <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
+            Generate Payment QR Code
+          </h1>
+          <p className="text-[#FBFBFB] text-[20px] font-[400]">
+            Accepting USDC, USDT, or STRK payments from customers using QR codes
           </p>
-        )}
-      </div>
-      <div className="p-[32px] w-full h-full flex flex-col gap-[36px] border-[#FBFBFB1F] border  rounded-[19px] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90">
-        <div className="flex flex-col  gap-[36px] ">
-          <div className="flex flex-col gap-[36px] w-full">
-            <label
-              className="text-[22px] text-[#8F6DF5] font-[600]"
-              htmlFor="amount"
-            >
-              Payment Amount
-            </label>
-            <div className="flex w-full justify-between items-center rounded-[28px] min-h-[54px]  border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
-              <span className="text-white pr-1">N</span>
-              <input
-                type="text"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="outline-none w-full text-white "
-              />
-              <p className="flex gap-[8px] text-white/90 items-center">
-                <span>{currency}</span>
-                <span>
-                  {exchangeRates.rates[
-                    currency as keyof typeof exchangeRates.rates
-                  ]
-                    ? currencyValue
-                    : "Loading..."}
-                </span>
+          {!walletAddress && (
+            <p className="text-red-500 text-sm">
+              Please connect your Starknet wallet to proceed
+            </p>
+          )}
+        </div>
+        <div className="p-[32px] w-full h-full flex flex-col gap-[36px] border-[#FBFBFB1F] border  rounded-[19px] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90">
+          <div className="flex flex-col  gap-[36px] ">
+            <div className="flex flex-col gap-[36px] w-full">
+              <label
+                className="text-[22px] text-[#8F6DF5] font-[600]"
+                htmlFor="amount"
+              >
+                Payment Amount
+              </label>
+              <div className="flex w-full justify-between items-center rounded-[28px] min-h-[54px]  border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
+                <span className="text-white pr-1">N</span>
+                <input
+                  type="text"
+                  id="amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="outline-none w-full text-white "
+                />
+                <p className="flex gap-[8px] text-white/90 items-center">
+                  <span>{currency}</span>
+                  <span>
+                    {exchangeRates.rates[
+                      currency as keyof typeof exchangeRates.rates
+                    ]
+                      ? currencyValue
+                      : "Loading..."}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-[36px] w-full relative">
+              <label
+                className="text-[22px] text-[#8F6DF5] font-[600]"
+                htmlFor="currency"
+              >
+                Currency
+              </label>
+              <div className="rounded-[28px] flex justify-between items-center border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
+                <input
+                  type="text"
+                  value={currency}
+                  className="text-white outline-none bg-transparent border-none"
+                  disabled
+                />
+                <button
+                  type="button"
+                  onClick={handleShowDropDown}
+                  className="cursor-pointer hover:bg-white/10 rounded-full"
+                >
+                  <ChevronDown size={25} color="white" />
+                </button>
+              </div>
+              {showDropDown && (
+                <div className="w-full flex flex-col absolute top-[100%] py-3 z-10 bg-[#8F6DF51A]/10">
+                  <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
+                  {currencies.map((currencyOption, index) => (
+                    <button
+                      type="button"
+                      onClick={(e) => handleFileChange(currencyOption, e)}
+                      key={index}
+                      className="w-full relative z-10 px-8 py-3 hover:bg-[#FBFBFB12]/30 text-white text-[16px] font-[400] text-end"
+                    >
+                      {currencyOption}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {amount && currency && (
+            <div className="p-3 bg-transparent -mt-10 rounded-lg">
+              <p className="text-sm text-gray-500">
+                Fee (0.5%):{" "}
+                {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
+                {currency !== "NGN" && (
+                  <span className="text-xs text-gray-500 mt-1">
+                    {" Current Rate: 1 "}
+                    {currency}
+                    {" = ₦"}
+                    {exchangeRates.rates[
+                      currency as keyof typeof exchangeRates.rates
+                    ]?.toLocaleString() ?? "Loading..."}
+                  </span>
+                )}
               </p>
             </div>
-          </div>
-          <div className="flex flex-col gap-[36px] w-full relative">
-            <label
-              className="text-[22px] text-[#8F6DF5] font-[600]"
-              htmlFor="currency"
-            >
-              Currency
-            </label>
-            <div className="rounded-[28px] flex justify-between items-center border py-[16px] px-[20px] bg-[#8F6DF51A]/10 border-[#8F6DF566]">
-              <input
-                type="text"
-                value={currency}
-                className="text-white outline-none bg-transparent border-none"
-                disabled
-              />
-              <button
-                type="button"
-                onClick={handleShowDropDown}
-                className="cursor-pointer hover:bg-white/10 rounded-full"
-              >
-                <ChevronDown size={25} color="white" />
-              </button>
+          )}
+          {error && (
+            <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
+              {error}
             </div>
-            {showDropDown && (
-              <div className="w-full flex flex-col absolute top-[100%] py-3 z-10 bg-[#8F6DF51A]/10">
-                <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
-                {currencies.map((currencyOption, index) => (
-                  <button
-                    type="button"
-                    onClick={(e) => handleFileChange(currencyOption, e)}
-                    key={index}
-                    className="w-full relative z-10 px-8 py-3 hover:bg-[#FBFBFB12]/30 text-white text-[16px] font-[400] text-end"
-                  >
-                    {currencyOption}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        {amount && currency && (
-          <div className="p-3 bg-transparent -mt-10 rounded-lg">
-            <p className="text-sm text-gray-500">
-              Fee (0.5%):{" "}
-              {(Number.parseFloat(amount || "0") * 0.005).toFixed(3)} {currency}
-              {currency !== "NGN" && (
-                <span className="text-xs text-gray-500 mt-1">
-                  {" Current Rate: 1 "}
-                  {currency}
-                  {" = ₦"}
-                  {exchangeRates.rates[
-                    currency as keyof typeof exchangeRates.rates
-                  ]?.toLocaleString() ?? "Loading..."}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
-        {error && (
-          <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
-            {error}
-          </div>
-        )}
+          )}
 
-        <div className="w-full bg-[#515151] overflow-hidden rounded-[48px]">
-          <button
-            type="button"
-            onClick={generateQR}
-            disabled={!amount || !currency || isGenerating}
-            className={`flex gap-[10px] justify-center items-center w-full p-[21px] ${
-              !amount || !currency || isGenerating
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#493E71]"
-            }`}
-          >
-            <QrCode color="#FBFBFB" size={40} />
-            <span className="text-[20px] font-[600] text-[#FBFBFB]">
-              {isGenerating ? "Generating..." : "Generate Payment QR"}
-            </span>
-          </button>
-        </div>
+          <div className="w-full bg-[#515151] overflow-hidden rounded-[48px]">
+            <button
+              type="button"
+              onClick={generateQR}
+              disabled={!amount || !currency || isGenerating}
+              className={`flex gap-[10px] justify-center items-center w-full p-[21px] ${
+                !amount || !currency || isGenerating
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#493E71]"
+              }`}
+            >
+              <QrCode color="#FBFBFB" size={40} />
+              <span className="text-[20px] font-[600] text-[#FBFBFB]">
+                {isGenerating ? "Generating..." : "Generate Payment QR"}
+              </span>
+            </button>
+          </div>
 
-        <div className="w-full text-[#FBFBFB] text-[16px] font-[400] flex justify-start gap-[12px]">
-          <span>Transaction fee:</span>
-          <span>0.5%</span>
+          <div className="w-full text-[#FBFBFB] text-[16px] font-[400] flex justify-start gap-[12px]">
+            <span>Transaction fee:</span>
+            <span>0.5%</span>
+          </div>
         </div>
-      </div>
 
         {qrModalOpen && qrCode && (
           <div className="absolute top-0 left-0 w-full h-full ">
