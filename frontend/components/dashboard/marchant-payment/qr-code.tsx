@@ -76,13 +76,13 @@ export default function QrCodComponent({
         </div>
         <div className="flex  gap-[20px] w-full items-center justify-center">
           <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
-            {currency}: {CurrencyValue}
+            NGN: {CurrencyValue}
           </h1>
           <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
             Token: {currency}
           </h1>
           <h1 className="bg-[#464849B2] text-[#FBFBFB] rounded-[8px] px-[22px] py-[16px]  text-[18px] font-[500]">
-            NGN Value: {Amount}
+            {currency}: {Amount}
           </h1>
         </div>
       </div>

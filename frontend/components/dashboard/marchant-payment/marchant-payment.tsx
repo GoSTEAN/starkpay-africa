@@ -59,7 +59,12 @@ export default function MarchantPayment({
   const currencies = ["USDT", "USDC", "STRK"] as const;
   const exchangeRates = useExchangeRates();
   const { address: walletAddress, status } = useAccount();
-  // const { balances, loading: balanceLoading, error: balanceError } = useGetBalance();
+ const [stepsStatus, setStepsStatus] = useState<Status[]>([
+    "pending",
+    "pending",
+    "pending",
+    "pending",
+  ]);
 
   const provider = new RpcProvider({
     nodeUrl: "https://starknet-sepolia.public.blastapi.io",
@@ -384,33 +389,60 @@ export default function MarchantPayment({
       }
     }
   };
+  
+    useEffect(() => {
+    const newStatus: Status[] = ["pending", "pending", "pending", "pending"];
+    
+    if (amount) {
+      newStatus[0] = "completed";
+      newStatus[1] = "in_progress";
+    }
+    
+    if (amount && currency) {
+      newStatus[1] = "completed";
+      newStatus[2] = "in_progress";
+    }
+    
+    if (qrCode) {
+      newStatus[2] = "completed";
+      newStatus[3] = "in_progress";
+    }
+    
+    if (transactionStatus === "success") {
+      newStatus[3] = "completed";
+    }
+    
+    setStepsStatus(newStatus);
+  }, [amount, currency, qrCode, transactionStatus]);
+
   type Status = "pending" | "completed" | "in_progress";
 
   const stat: Status = "pending";
-  const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
+    const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
+
   return (
     <div className="relative rounded-[19px] w-full pt-10 max-w-[1000px] h-full overflow-y-scroll gap-[32px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="gap-[8px] justify-between w-full items-center hidden md:flex">
-        {steps.map((step, index) => (
+         {steps.map((step, index) => (
           <div key={index} className="flex w-full flex-col gap-[6px] ">
             <div className="flex gap-[3px] items-center">
               <span
                 className={`w-[36.0510196685791px] flex-none h-[36.0510196685791px] flex items-center justify-center text-center text-white rounded-[64px] border-[0.5px] ${
-                  stat === "pending" || stat === "completed"
+                  stepsStatus[index] !== "pending"
                     ? "bg-[#8F6DF5]"
                     : "bg-transparent"
                 } border-[#493E71]`}
               >
-                {stat === "pending" ? (
-                  <span> 0{index + 1}</span>
-                ) : (
+                {stepsStatus[index] === "completed" ? (
                   <ShieldCheck color="white" />
+                ) : (
+                  `0${index + 1}`
                 )}
               </span>
               {index < 3 && (
                 <span
                   className={`w-full h-[1px]  ${
-                    stat === "pending" || stat === "completed"
+                    stepsStatus[index] !== "pending"
                       ? "bg-[#8F6DF5]"
                       : "bg-[#493E71]"
                   }`}
@@ -419,12 +451,17 @@ export default function MarchantPayment({
             </div>
             <div className="font-[400] text-white">step {index + 1}</div>
             <div className="font-[600] text-white">{step}</div>
-            <div className="font-[400] text-[#8F6DF5]">{stat}</div>
+            <div className="font-[400] text-[#8F6DF5] capitalize">
+              {stepsStatus[index]}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col gap-[22px]">
+      
+
+      <div className={`flex flex-col w-full justify-center gap-[32px] relative`}>
+       <div className="flex flex-col gap-[22px]">
         <h1 className="text-[#8F6DF5] text-[20px] md:text-[30px] lg:text-[41px] font-[600]">
           Generate Payment QR Code
         </h1>
@@ -437,9 +474,8 @@ export default function MarchantPayment({
           </p>
         )}
       </div>
-
-      <div className="flex flex-col w-full justify-center p-[32px] relative gap-[36px] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-[19px] border border-[#FBFBFB1F]">
-        <div className="flex flex-col  gap-[36px]">
+      <div className="p-[32px] w-full h-full flex flex-col gap-[36px] border-[#FBFBFB1F] border  rounded-[19px] bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90">
+        <div className="flex flex-col  gap-[36px] ">
           <div className="flex flex-col gap-[36px] w-full">
             <label
               className="text-[22px] text-[#8F6DF5] font-[600]"
@@ -554,6 +590,7 @@ export default function MarchantPayment({
           <span>Transaction fee:</span>
           <span>0.5%</span>
         </div>
+      </div>
 
         {qrModalOpen && qrCode && (
           <div className="absolute top-0 left-0 w-full h-full ">
