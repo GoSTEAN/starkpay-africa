@@ -12,6 +12,9 @@ export type Notification = {
   category: "payment" | "withdrawal" | "qr_code" | "transaction"| "connection";
   link?: string;
   status?: "pending" | "completed" | "failed";
+  amount?: number | string;
+  currency?: string;
+
 };
 
 type NotificationContextType = {
@@ -71,6 +74,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           status: n.status,
           read: n.read ?? false,
           timestamp: n.timestamp ?? new Date(),
+          amount: n.amount,
+          currency : n.currency,
         };
         setNotifications((prev) => [notif, ...prev]);
       },

@@ -2,7 +2,11 @@
 
 import { Percent, Users } from "lucide-react";
 import React, { useState } from "react";
-import { useAccount, useContract, useSendTransaction } from "@starknet-react/core";
+import {
+  useAccount,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
 import { num } from "starknet";
 import Payment from "./payment";
 import { STARKPAY_ABI as smeAbi } from "@/hooks/useStarkpayContract";
@@ -10,8 +14,8 @@ import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 
 // Define the Split interface
 interface Split {
-  address: string; 
-  amount: string; 
+  address: string;
+  amount: string;
   currency: string;
   isPercentage: boolean;
 }
@@ -30,32 +34,37 @@ const TOKEN_DECIMALS: { [key: string]: number } = {
   STRK: 18,
 };
 
-
-
 export default function SplitPayment() {
-  const [currency, setCurrency] = useState<string>("USDT");
+  const [currency, setCurrency] = useState<string>("STRK");
   const [toggle, setToggle] = useState<boolean>(false);
   const [address, setAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [splits, setSplits] = useState<Split[]>([]);
   const [error, setError] = useState<string>("");
   const [togglePayment, setTogglePayment] = useState<boolean>(false);
+  const [selectedSplit, setSelectedSplit] = useState(3)
+  const [activeSplit, setActiveSplit] = useState(selectedSplit)
 
+  
+  const handleSelectedSplit = (type: number) => {
+    setSelectedSplit(type)
+    setActiveSplit(type)
+  }
   // Store transaction hash as proxy for SME ID
-  const [smeId, setSmeId] = useState<string | null>(null); 
+  const [smeId, setSmeId] = useState<string | null>(null);
 
   const { address: connectedAddress } = useAccount();
 
   // Contract address
-  let smeContractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS 
-  
+  let smeContractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
   if (!smeContractAddress) {
     throw new Error("NEXT_PUBLIC_CONTRACT_ADDRESS is not defined");
-  } 
+  }
   if (!smeContractAddress.startsWith("0x")) {
-  smeContractAddress = `0x${smeContractAddress}`;
-}
-const typedContractAddress = smeContractAddress as `0x${string}`;
+    smeContractAddress = `0x${smeContractAddress}`;
+  }
+  const typedContractAddress = smeContractAddress as `0x${string}`;
   // Create contract instance
   const { contract } = useContract({
     abi: smeAbi,
@@ -63,14 +72,19 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
   });
 
   // Hook for sending create_sme3 transaction
-  const { sendAsync: sendCreateSme3, error: createError, data: createData } = useSendTransaction({
+  const {
+    sendAsync: sendCreateSme3,
+    error: createError,
+    data: createData,
+  } = useSendTransaction({
     calls: undefined,
   });
 
   // Hook for sending distribute_sme3_payment transaction
-  const { sendAsync: sendDistributePayment, error: distributeError } = useSendTransaction({
-    calls: undefined,
-  });
+  const { sendAsync: sendDistributePayment, error: distributeError } =
+    useSendTransaction({
+      calls: undefined,
+    });
 
   const handleToggle = () => setToggle(!toggle);
 
@@ -94,14 +108,18 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
     }
 
     // Validate percentage: must be u8 (0-255) and integer
-    if (parsedAmount < 0 || parsedAmount > 255 || !Number.isInteger(parsedAmount)) {
+    if (
+      parsedAmount < 0 ||
+      parsedAmount > 255 ||
+      !Number.isInteger(parsedAmount)
+    ) {
       setError("Percentage must be an integer between 0 and 255");
       return;
     }
 
     // Validate splits length
-    if (splits.length >= 3) {
-      setError("Cannot add more than 3 recipients");
+    if (splits.length >= activeSplit) {
+      setError(`Cannot add more than ${activeSplit} recipients`);
       return;
     }
 
@@ -124,7 +142,7 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
       address,
       amount,
       currency,
-      isPercentage: true, 
+      isPercentage: true,
     };
 
     setSplits([...splits, newSplit]);
@@ -132,51 +150,61 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
     setAmount("");
   };
 
-  const handleConfigureSplit = async () => {
-    console.log("address", address, contract)
-    // if (!address || !contract) {
-    //   setError("Please connect your Starknet wallet and ensure contract is loaded");
-    //   return;
-    // }
+const handleConfigureSplit = async () => {
+  console.log("address", connectedAddress,"contrsct", contract);
+  if (!connectedAddress || !contract) {
+    setError("Please connect your Starknet wallet and ensure contract is loaded");
+    return;
+  }
 
-    if (splits.length !== 3) {
-      setError("Exactly 3 recipients are required");
+  if (splits.length !== activeSplit) {
+    setError(`Exactly ${activeSplit} recipients are required`);
+    return;
+  }
+
+  const totalPercent = totalPercentage;
+  if (totalPercent !== 100) {
+    setError("Total percentage must equal 100%");
+    return;
+  }
+
+  try {
+    // Determine which function to call based on activeSplit
+    const functionName = `create_sme${activeSplit}`;
+    
+    // Build parameters dynamically
+    const params: any[] = [];
+    for (let i = 0; i < activeSplit; i++) {
+      params.push(splits[i].address);
+      params.push(parseInt(splits[i].amount));
+    }
+
+    const call = contract?.populate(functionName, params);
+    
+    if (!call) {
+      setError("Failed to populate contract call for SME creation.");
       return;
     }
+    
+    const result = await sendCreateSme3([call]);
+    const smeIdHex = result.transaction_hash;
+    setSmeId(smeIdHex);
+    setError("");
+    alert(`SME configuration created successfully! Transaction Hash: ${smeIdHex}`);
+    setTogglePayment(true);
+  } catch (err) {
+    setError("Failed to create SME configuration: " + (err as Error).message);
+  }
+};
 
-    const totalPercent = totalPercentage;
-    if (totalPercent !== 100) {
-      setError("Total percentage must equal 100%");
-      return;
-    }
-
-    try {
-      const call = contract?.populate("create_sme3", [
-        splits[0].address,
-        parseInt(splits[0].amount),
-        splits[1].address,
-        parseInt(splits[1].amount),
-        splits[2].address,
-        parseInt(splits[2].amount),
-      ]);
-      if (!call) {
-        setError("Failed to populate contract call for SME creation.");
-        return;
-      }
-      const result = await sendCreateSme3([call]);
-      const smeIdHex = result.transaction_hash;
-      setSmeId(smeIdHex);
-      setError("");
-      alert(`SME configuration created successfully! Transaction Hash: ${smeIdHex}`);
-      setTogglePayment(true); // Automatically open the payment component
-    } catch (err) {
-      setError("Failed to create SME configuration: " + (err as Error).message);
-    }
-  };
-
-  const handleConfirmPayment = async (totalAmount: string, currencyToSend: string) => {
+  const handleConfirmPayment = async (
+    totalAmount: string,
+    currencyToSend: string
+  ) => {
     if (!connectedAddress) {
-      setError("Please connect your Starknet wallet and ensure contract is loaded");
+      setError(
+        "Please connect your Starknet wallet and ensure contract is loaded"
+      );
       return;
     }
 
@@ -199,9 +227,11 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
 
     // Convert totalAmount to u256 with decimals
     const decimals = TOKEN_DECIMALS[currencyToSend] || 18;
-    const amountBN = BigInt(Math.floor(parsedAmount * (10 ** decimals)));
+    const amountBN = BigInt(Math.floor(parsedAmount * 10 ** decimals));
     const low = (amountBN & (BigInt(Math.pow(2, 128)) - BigInt(1))).toString();
     const high = (amountBN >> BigInt(128)).toString();
+
+    const functionName = `distribute_sme${activeSplit}_payment`
 
     try {
       // Approve call
@@ -214,7 +244,7 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
       // Distribute call
       const distributeCall = {
         contractAddress: smeContractAddress,
-        entrypoint: "distribute_sme3_payment",
+        entrypoint: functionName,
         calldata: [low, high, tokenAddress],
       };
 
@@ -234,35 +264,58 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
   }, 7000);
 
   // Calculate total allocated percentage
-  const totalPercentage: number = splits.reduce((total: number, split: Split) => {
-    return total + parseFloat(split.amount) || 0;
-  }, 0);
+  const totalPercentage: number = splits.reduce(
+    (total: number, split: Split) => {
+      return total + parseFloat(split.amount) || 0;
+    },
+    0
+  );
 
-  const currencyType: string[] = ["USDT", "USDC", "STRK"]; 
+  const currencyType: string[] = ["USDT", "USDC", "STRK"];
   const hasSplits: boolean = splits.length > 0;
 
+  const splittype = [3, 4, 5];
   return (
-    <section className="relative rounded-[19px] py-[66px] w-full h-full border overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+    <section className="relative rounded-[19px] py-[66px] w-full h-full  overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat]  bg-[#212324]">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between items-start">
-        <div className="flex flex-col gap-[8px] pb-[24px]">
-          <h1 className="text-[32px] font-[600px] text-[#8F6DF5] font-[Montserrat]">
-            Payment Split Configuration
-          </h1>
-          <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-            Set up automatic payment distribution for SMEs (e.g., owner, workers, reserves)
-          </p>
-          {smeId && (
-            <p className="text-[14px] font-[400] font-[Open Sans] text-[#8F6DF5]">
-              Transaction Hash: {smeId}
+        <div className="flex w-full justify-between pr-10 gap-[8px] pb-[24px]">
+          <div className="flex flex-col gap[8px]">
+            <h1 className="text-[32px] font-[600px] text-[#8F6DF5] font-[Montserrat]">
+              Payment Split Configuration
+            </h1>
+            <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
+              Set up automatic payment distribution for SMEs (e.g., owner,
+              workers, reserves)
             </p>
-          )}
+            {smeId && (
+              <p className="text-[14px] font-[400] font-[Open Sans] text-[#8F6DF5]">
+                Transaction Hash: {smeId}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h1 className="text-white/80 text-[18px] font-[500]">Split type</h1>
+            <div className="flex border-[0.5px] border-white/10 rounded-md ">
+              {splittype.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => handleSelectedSplit(type)}
+                  className={`py-[8px] px-[32px] text-white border-white/10 border-r-[0.3px] ${activeSplit == type ? "bg-white/20" : ""} hover:bg-white/10`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       <div className="w-full h-full p-[32px] bg-[linear-gradient(253.67deg,rgba(143,109,245,0.1)_18.27%,rgba(33,35,36,0.1)_91.93%)] border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col items-center">
         <div className="w-full rounded-full flex gap-[10px] items-center py-[16px] px-[20px] border-[1px] border-white/20">
           <Users color="white" size={20} />
           <p className="text-[14px] text-white font-[400] font-[Open Sans]">
-            Configure exactly 3 recipient addresses with percentages totaling 100%
+            Configure exactly 3 recipient addresses with percentages totaling
+            100%
           </p>
         </div>
         <div className="flex flex-col lg:flex-row gap-8 w-full">
@@ -278,7 +331,9 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
                 <input
                   type="text"
                   value={address}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddress(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setAddress(e.target.value)
+                  }
                   id="address"
                   placeholder="0x123..."
                   className="text-[#FBFBFB99]/90 w-full text-[16px] py-[16px] px-[20px] font-[600px] outline-none bg-transparent border-none"
@@ -296,7 +351,7 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
                 <button
                   type="button"
                   onClick={handleToggle}
-                  className="text-white/70 cursor-pointer"
+                  className="text-white/70 cursor-pointer  py-[16px] px-[20px]"
                 >
                   {currency}
                 </button>
@@ -330,7 +385,9 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
                 <input
                   type="text"
                   value={amount}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setAmount(e.target.value)
+                  }
                   id="amount"
                   placeholder="60"
                   className="text-[#FBFBFB99]/90 text-[16px] w-[30px] font-[600px] outline-none bg-transparent border-none py-[16px]"
@@ -370,7 +427,9 @@ const typedContractAddress = smeContractAddress as `0x${string}`;
                     >
                       <div className="flex gap-[10px]">
                         <p className="text-white/80 w-fit">{index + 1}</p>
-                        <p className="truncate max-w-[200px]">{split.address}</p>
+                        <p className="truncate max-w-[200px]">
+                          {split.address}
+                        </p>
                       </div>
                       <p>{split.amount}%</p>
                     </div>

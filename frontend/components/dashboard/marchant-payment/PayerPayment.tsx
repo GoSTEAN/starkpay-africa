@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 import { STARKPAY_ABI as ERC20_ABI } from "@/hooks/useStarkpayContract";
 import { Html5QrcodeScanner } from "html5-qrcode/cjs/html5-qrcode-scanner.js";
+
 // Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {
   USDT: tokenAddress.USDT,
@@ -222,7 +223,7 @@ export default function PayerPayment() {
   };
 
   return (
-    <section className="relative  rounded-[19px] py-[66px] max-w-[800px] max-h-[800px] border border-white/10 z-10 text-white w-full h-full overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+    <section className="relative pt-10 rounded-[19px] py-[66px] max-w-[800px] max-h-[800px] border border-white/10 z-10 text-white w-full h-full overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="flex flex-col gap-[8px] pb-[24px]">
         <h1 className="text-[32px] font-[600] text-[#8F6DF5] font-[Montserrat]">
           Scan and Pay

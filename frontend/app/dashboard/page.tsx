@@ -9,6 +9,8 @@ import {
   Landmark,
   History,
   ArrowUpDown,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import MarchantPayment from "@/components/dashboard/marchant-payment/marchant-payment";
 import TransactionHistory from "@/components/dashboard/transactions.tsx/transaction-history";
@@ -19,7 +21,7 @@ import NGNWithdrawal from "@/components/dashboard/withdrawal/NgnWithdrawal";
 import TokenSwap from "@/components/dashboard/token-swap";
 import ProtectedRoute from "@/context/protectedRoute";
 import useNotifications from "@/components/providers/notification-provider";
-// import Notifications from "@/components/ui/notification";
+import Logout from "@/components/dashboard/logout";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Home");
@@ -28,10 +30,6 @@ export default function Dashboard() {
   const {
     notifications,
     addNotification,
-    markAsRead,
-    markAllAsRead,
-    removeNotification,
-    clearAll,
   } = useNotifications();
 
   const tabs = [
@@ -59,6 +57,14 @@ export default function Dashboard() {
       icon: <History size={25} color="white" className="stroke-3" />,
       name: "Transactions",
     },
+     {
+      icon: <Settings size={25} color="white" className="stroke-3" />,
+      name: "Settings",
+    },
+     {
+      icon: <LogOut size={25} color="white" className="stroke-3" />,
+      name: "Log Out",
+    },
   ];
 
   const addTransaction = (transaction: any) => {
@@ -69,14 +75,16 @@ export default function Dashboard() {
         transaction.status === "success"
           ? "Transaction Successful"
           : "Transaction Failed",
-      message: `Transaction: ${transaction.amount} ${transaction.currency} (${transaction.status})`,
+      message: `Transaction: ${transaction.ngnValue} ${transaction.currency} (${transaction.status})`,
       timestamp: new Date(),
       read: false,
       category: "transaction",
+      amount: transaction.ngnValue,
+      currency: transaction.currency,
       status: transaction.status,
     });
   };
-
+console.log(notifications)
   useEffect(() => {
     if (Status && Type) {
       const timer = setTimeout(() => {
@@ -89,9 +97,9 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="bg-[#212324] w-screen justify-between lg:gap-[50px] relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50px] lg:px-[200px]">
+      <div className="bg-[#212324] w-screen justify-between lg:gap-[50px] pt-25 relative h-screen flex flex-col lg:flex-row lg:items-center px-3 md:px-[50px] lg:px-[200px]">
         <SideNav tabs={tabs} setTab={setActiveTab} activeTab={activeTab} />
-        <div className="w-full lg:max-w-[1296px] h-[850px] mt-20 items-start bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90 rounded-2xl overflow-y-scroll">
+        <div className="w-full  h-full  items-start flex justify-center rounded-2xl overflow-y-scroll">
           {activeTab === "Marchant pay" && (
             <MarchantPayment
               onTransaction={addTransaction}
@@ -110,9 +118,10 @@ export default function Dashboard() {
               addNotification={addNotification}
             />
           )}
-          {activeTab === "Home" && <DashboardHome />}
+          {activeTab === "Home" && <DashboardHome transactions={notifications} />}
           {activeTab === "Payment split" && <SplitPayment />}
           {activeTab === "Swap" && <TokenSwap />}
+          {activeTab === "Log Out" && <Logout />}
         </div>
         {Status && Type && (
           <div className="absolute top-0 left-0 w-full h-full z-10">
