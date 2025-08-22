@@ -4,6 +4,8 @@ import {
   CircleCheck,
   Copy,
   Eye,
+  EyeClosed,
+  Loader2,
   LogOut,
   PencilLine,
   RotateCcw,
@@ -20,6 +22,7 @@ import { useUserRole } from "@/hooks/getUserRole";
 import { Contract, RpcProvider } from "starknet";
 import BecomeAMerchant from "./become-a-marchant";
 import { STARKPAY_ABI as MERCHANT_ABI } from "@/hooks/useStarkpayContract";
+import useGetBalance from "@/hooks/useGetBalance";
 
 const MERCHANT_ADDRESS =
   "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
@@ -31,7 +34,17 @@ export default function DashboardHome() {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
   const [activeDuration, setActiveDration] = useState("Week");
+  const {
+    balances,
+    loading: balanceLoading,
+    error: balanceError,
+    refetch,
+  } = useGetBalance();
+  const [hideDetails, setHideDetals] = useState(false);
 
+  const handleHideDetails = () => {
+    setHideDetals(!hideDetails);
+  };
   const handleDurationChange = (dur: string) => {
     setActiveDration(dur);
   };
@@ -42,7 +55,6 @@ export default function DashboardHome() {
   const emailAddress = "talinanzing111@gmail.com";
   const location = "No 4 Mozambique Barnawa Complex, Kaduna";
   const amount = "12,000,500";
-  const balance = "7,098";
   const img = "/user.jpg";
   const recentNames = [
     "Peter Onoja",
@@ -127,10 +139,20 @@ export default function DashboardHome() {
         <div className=" w-full max-[852px] h-auto p-[32px]  bg-gradient-to-l from-[#8F6DF5]/20 to-[#212324]/90  border border-[#FBFBFB1F] gap-6 rounded-[19px] opacity-100 flex flex-col">
           <div className="text-[16px] text-[#8F6DF5] flex gap-[8px]">
             <span>Total Balance</span>
-            <Eye color="white" />
+            <button onClick={handleHideDetails} className=" cursor-pointer">
+              {hideDetails ? (
+                <EyeClosed color="white" />
+              ) : (
+                <Eye color="white" />
+              )}
+            </button>
           </div>
-          <div className="text-[38px] text-white font-[600]">
-            N<span>{amount}</span>
+          <div className=" text-[20px] lg:text-[38px] text-white font-[600]">
+            {hideDetails ? (
+              <span className="text-wite text-2xl">******</span>
+            ) : (
+              <span>N {amount}</span>
+            )}
           </div>
 
           <div className="flex flex-col gap-[15px] ">
@@ -138,7 +160,11 @@ export default function DashboardHome() {
               Account
             </h1>
             <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-              {accNo}
+              {hideDetails ? (
+                <span className="text-wite text-2xl">****</span>
+              ) : (
+                <span> {accNo}</span>
+              )}
             </p>
           </div>
         </div>
@@ -148,7 +174,17 @@ export default function DashboardHome() {
               USDC Balance
             </h1>
             <p className="text-[21px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-              {balance}
+              {hideDetails ? (
+                <span className="text-wite text-2xl">----</span>
+              ) : (
+                <span className="flex">
+                  {balanceLoading ? (
+                    <Loader2 color="white" className="animate-spin" />
+                  ) : (
+                    balances["USDC" as keyof typeof balances]
+                  )}
+                </span>
+              )}
             </p>
           </div>
           <div className=" rounded-[11px] p-[22px] gap-[12px] border border-[#8F6DF5]/30 flex flex-col w-full ">
@@ -156,7 +192,17 @@ export default function DashboardHome() {
               USDT Balance
             </h1>
             <p className="text-[21px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-              {balance}
+             {hideDetails ? (
+                <span className="text-wite text-2xl">----</span>
+              ) : (
+                <span className="flex">
+                  {balanceLoading ? (
+                    <Loader2 color="white" className="animate-spin" />
+                  ) : (
+                    balances["USDT" as keyof typeof balances]
+                  )}
+                </span>
+              )}
             </p>
           </div>
           <div className=" rounded-[11px] p-[22px] border border-[#8F6DF5]/30 gap-[12px] flex flex-col w-full ">
@@ -164,7 +210,17 @@ export default function DashboardHome() {
               STRK Balance
             </h1>
             <p className="text-[21px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-              {balance}
+              {hideDetails ? (
+                <span className="text-wite text-2xl">----</span>
+              ) : (
+                <span className="flex">
+                  {balanceLoading ? (
+                    <Loader2 color="white" className="animate-spin" />
+                  ) : (
+                    balances["STRK" as keyof typeof balances]
+                  )}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -238,7 +294,12 @@ export default function DashboardHome() {
                 <thead className="text-[#8F6DF5] font-[400px] font-[Open Sans] flex flex-col gap-[24px] lg:text-[16px] text-[14px] border-b-[1px] border-[#FBFBFB1A]   w-full">
                   <tr className="flex items-center gap-[48px] pb-[16px] ">
                     {thead?.map((td, id) => (
-                      <td className={`w-full truncate ${id > 0 ? "lg:w-[30%]" : "w-full"}`} key={id}>
+                      <td
+                        className={`w-full truncate ${
+                          id > 0 ? "lg:w-[30%]" : "w-full"
+                        }`}
+                        key={id}
+                      >
                         {td}
                       </td>
                     ))}
@@ -273,9 +334,22 @@ export default function DashboardHome() {
                           </h1>
                         </div>
                       </td>
-                      <td className="w-full lg:w-[30%] truncate">${td.amount}</td>
+                      <td className="w-full lg:w-[30%] truncate">
+                        ${td.amount}
+                      </td>
                       <td className="w-full lg:w-[30%] truncate">{td.date}</td>
-                      <td className="w-full lg:w-[30%] truncate flex gap-[6px] p-[6px_14px] items-center text-start justify-start bg-[#FBFBFB12] rounded-[30px]"><span>{td.status === "In progress"? <RotateCcw /> : ""}</span> <span>{td.status === "Warning"? <TriangleAlert /> : ""}</span> <span>{td.status === "Done"? <CircleCheck /> : ""}</span><span>{td.status}</span></td>
+                      <td className="w-full lg:w-[30%] truncate flex gap-[6px] p-[6px_14px] items-center text-start justify-start bg-[#FBFBFB12] rounded-[30px]">
+                        <span>
+                          {td.status === "In progress" ? <RotateCcw /> : ""}
+                        </span>{" "}
+                        <span>
+                          {td.status === "Warning" ? <TriangleAlert /> : ""}
+                        </span>{" "}
+                        <span>
+                          {td.status === "Done" ? <CircleCheck /> : ""}
+                        </span>
+                        <span>{td.status}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

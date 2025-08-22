@@ -21,7 +21,7 @@ export default function Profile() {
               verified
             </span>
             <ShieldCheck color="#4A6CE8" size={25} />
-            <p className="text-[18px]">{accNo}</p>
+            <p className=" hidden sm:flex text-[18px]">{accNo}</p>
           </>
         ) : (
           <>

@@ -99,16 +99,13 @@ export default function NavBar() {
 
       <div className="z-10 absolute right-8  lg:hidden flex gap-5 items-center">
         <div className="lg:hidden flex items-center justify-center">
-          <button className="relative" onClick={() => setToggle(!toggle)}>
-            <Bell className="h-5 w-5 text-[#8F6DF5]" />
-            {notifications.filter((n) => !n.read).length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs">
-                {notifications.filter((n) => !n.read).length > 99
-                  ? "99+"
-                  : notifications.filter((n) => !n.read).length}
-              </span>
-            )}
-          </button>
+          <Notifications
+            notifications={notifications}
+            onMarkAsRead={markAsRead}
+            onMarkAllAsRead={markAllAsRead}
+            onRemove={removeNotification}
+            onClearAll={clearAll}
+          />
         </div>
 
         <button
@@ -126,7 +123,6 @@ export default function NavBar() {
         <div className={` hidden lg:flex`}>
           <WalletConnectorModal />
         </div>
-
       </div>
 
       {/* Mobile Menu */}
@@ -153,77 +149,13 @@ export default function NavBar() {
             </button>
 
             {isLogedin ? (
-              <div className="flex flex-col gap-[20] items-center mt-10">
+              <div className="flex flex-col md:flex-row gap-[20] items-start md:items-center mt-10">
                 <Profile />
                 <SearchBar
                   placeholder="Search transaction ID..."
                   func={handleSearch}
                 />
 
-                <div className="flex justify-evenly items-center gap-[8] w-full">
-                  {/* Mobile Notifications Dropdown */}
-                  <div className="relative">
-                    <button className="relative">
-                      <Bell className="h-5 w-5 text-[#8F6DF5]" />
-                      {notifications.filter((n) => !n.read).length > 0 && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs">
-                          {notifications.filter((n) => !n.read).length > 9
-                            ? "9+"
-                            : notifications.filter((n) => !n.read).length}
-                        </span>
-                      )}
-                    </button>
-
-                    {/* Mobile Notifications List */}
-                    {notifications.length > 0 && (
-                      <div className="absolute right-0 mt-2 w-72 bg-[#212324] rounded-lg shadow-lg border border-[#8F6DF5]/20 z-50">
-                        <div className="p-3 border-b border-[#8F6DF5]/20">
-                          <div className="flex justify-between items-center">
-                            <h3 className="text-white font-medium">
-                              Notifications
-                            </h3>
-                            <button
-                              onClick={markAllAsRead}
-                              className="text-[#8F6DF5] text-sm"
-                            >
-                              Mark all as read
-                            </button>
-                          </div>
-                        </div>
-                        <div className="max-h-60 overflow-y-auto">
-                          {notifications.slice(0, 5).map((notification) => (
-                            <div
-                              key={notification.id}
-                              className={`p-3 border-b border-[#8F6DF5]/10 ${
-                                !notification.read ? "bg-[#8F6DF5]/10" : ""
-                              }`}
-                            >
-                              <div className="flex justify-between">
-                                <p className="text-white text-sm">
-                                  {notification.title}
-                                </p>
-                                {!notification.read && (
-                                  <span className="w-2 h-2 bg-[#8F6DF5] rounded-full"></span>
-                                )}
-                              </div>
-                              <p className="text-[#8F6DF5] text-xs mt-1">
-                                {notification.message}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="p-3 text-center">
-                          <button
-                            onClick={() => {}}
-                            className="text-[#8F6DF5] text-sm"
-                          >
-                            View all notifications
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="relative z-10 flex flex-col w-full items-start">

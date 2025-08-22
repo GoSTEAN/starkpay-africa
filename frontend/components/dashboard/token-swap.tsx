@@ -1,5 +1,5 @@
 "use client";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { AutoSwappr, TOKEN_ADDRESSES as SDK_TOKEN_ADDRESSES } from "autoswap-sdk";
@@ -198,8 +198,8 @@ export default function TokenSwap() {
                 </div>
                 <div className="flex flex-col xl:items-end  gap-[16px]">
                   <div className="flex text-white/90 text-[18px]  font-[500] items-center gap-[10px]">
-                    <span>
-                      Balance: {balanceLoading ? "Loading..." : balances[fromCurrency as keyof typeof balances]} {fromCurrency}
+                    <span className="flex">
+                      Balance: {balanceLoading ? <Loader2 color="white" className="animate-spin"/> : balances[fromCurrency as keyof typeof balances]} {fromCurrency}
                     </span>
                   </div>
                   <input
@@ -260,8 +260,8 @@ export default function TokenSwap() {
                 </div>
                 <div className="flex flex-col xl:items-end gap-[16px]">
                   <div className="flex text-white/90 text-[18px] font-[500] items-center gap-[10px]">
-                    <span>
-                      Balance: {balanceLoading ? "Loading..." : balances[toCurrency as keyof typeof balances]} {toCurrency}
+                    <span className="flex">
+                      Balance: {balanceLoading ? <Loader2 color="white" className="animate-spin"/>: balances[toCurrency as keyof typeof balances]} {toCurrency}
                     </span>
                   </div>
                   <input

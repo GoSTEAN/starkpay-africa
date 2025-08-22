@@ -389,7 +389,7 @@ export default function MarchantPayment({
   const stat: Status = "pending";
   const steps = ["Payment amount", "Currency", "Generate", "QR Code,"];
   return (
-    <div className="relative rounded-[19px] w-full  max-w-[1000px] h-full overflow-y-scroll gap-[32px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
+    <div className="relative rounded-[19px] w-full pt-10 max-w-[1000px] h-full overflow-y-scroll gap-[32px] flex flex-col font-[Montserrat] px-[32px] bg-[#212324]">
       <div className="gap-[8px] justify-between w-full items-center hidden md:flex">
         {steps.map((step, index) => (
           <div key={index} className="flex w-full flex-col gap-[6px] ">
