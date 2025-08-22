@@ -33,7 +33,7 @@ const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
     new WebWalletConnector({ url: "https://web.argent.xyz" }),
     ArgentMobileConnector.init({
       options: {
-        dappName: "Swift",
+        dappName: "Snooknet",
         url: "https://web.argent.xyz",
       },
     }),
