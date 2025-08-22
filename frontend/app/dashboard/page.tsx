@@ -80,14 +80,16 @@ export default function Dashboard() {
         transaction.status === "success"
           ? "Transaction Successful"
           : "Transaction Failed",
-      message: `Transaction: ${transaction.amount} ${transaction.currency} (${transaction.status})`,
+      message: `Transaction: ${transaction.ngnValue} ${transaction.currency} (${transaction.status})`,
       timestamp: new Date(),
       read: false,
       category: "transaction",
+      amount: transaction.ngnValue,
+      currency: transaction.currency,
       status: transaction.status,
     });
   };
-
+console.log(notifications)
   useEffect(() => {
     if (Status && Type) {
       const timer = setTimeout(() => {
@@ -121,7 +123,7 @@ export default function Dashboard() {
               addNotification={addNotification}
             />
           )}
-          {activeTab === "Home" && <DashboardHome />}
+          {activeTab === "Home" && <DashboardHome transactions={notifications} />}
           {activeTab === "Payment split" && <SplitPayment />}
           {activeTab === "Swap" && <TokenSwap />}
           {activeTab === "Log Out" && <Logout />}

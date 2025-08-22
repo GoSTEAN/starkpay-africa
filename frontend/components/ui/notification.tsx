@@ -17,6 +17,8 @@ interface Notification {
   read: boolean;
   category: "payment" | "withdrawal" | "qr_code" | "transaction" | "connection";
   status?: "pending" | "completed" | "failed";
+  amount?: number | string;
+  currency?: string;
 }
 
 interface NotificationNavProps {

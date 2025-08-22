@@ -326,7 +326,7 @@ export default function MarchantPayment({
         type: "qr_payment",
         amount: currencyValue,
         currency,
-        status: "pending",
+        status: transactionStatus,
         timestamp: new Date(),
         ngnValue: amount,
         transactionHash: transactionHash,
@@ -355,6 +355,9 @@ export default function MarchantPayment({
         timestamp: new Date(),
         read: false,
         category: "qr_code",
+        amount: amount,
+        currency: currency,
+        status: status,
       });
     } catch (err) {
       const errorMessage =
@@ -370,6 +373,9 @@ export default function MarchantPayment({
         timestamp: new Date(),
         read: false,
         category: "qr_code",
+        amount: amount,
+        currency: currency,
+        status: status
       });
     } finally {
       setIsGenerating(false);

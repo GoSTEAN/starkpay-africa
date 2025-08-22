@@ -37,8 +37,11 @@ export default function TransactionHistory({
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
+console.log(filteredTransactions)
+ 
+
   return (
-    <div className="relative rounded-[19px] h-full py-[26px] overflow-hidden gap-[22px] flex flex-col lg:flex-row items-center justify-between font-[Montserrat] px-5 xl:px-[32px] bg-transparent  shadow-[inset_3px_4px_2px_-1px_rgba(0,0,0,0.23),inset_-5px_-5px_4px_-5px_rgba(251,251,251,0.06)]">
+    <div className="relative rounded-[19px] w-full h-full py-[26px] gap-[22px] flex flex-col lg:flex-row items-center justify-between font-[Montserrat] px-5 xl:px-[32px] bg-transparent ">
       <div className="lg:w-[200px] fixed z-10 lg:min-h-[488px]  justify-between items-center lg:items-start hidden lg:flex lg:justify-start overflow-x-scroll lg:overflow-hidden lg:flex-col gap-[42px]">
         {tabs.map((tab, index) => (
           <button
@@ -99,6 +102,9 @@ export default function TransactionHistory({
 
       <div className="w-full h-full">
         <div className="w-full lg:w-3/4 mx-auto">
+        <div className="sticky top-0">
+                <div className="absolute inset-0 bg-transparent backdrop-blur-lg pointer-events-none" />
+
           <div className="mb-8 sticky top-0">
             <h1 className="text-4xl font-bold text-[#8f6df5] mb-2">
               Transaction History
@@ -113,6 +119,7 @@ export default function TransactionHistory({
                 : "All transactions"}
             </p>
           </div>
+        </div>
 
           {sortedTransactions.length === 0 ? (
             <div className="text-center py-12 text-[#8F6DF5]">
@@ -121,7 +128,7 @@ export default function TransactionHistory({
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-6 flex  flex-col w-full overflow-y-scroll">
               {sortedTransactions.map((tx) => (
                 <HistoryCard
                   key={tx.id}
@@ -135,7 +142,7 @@ export default function TransactionHistory({
                   }
                   description={`${tx.amount} ${tx.currency}`}
                   trackingId={tx.id}
-                  ngnValue={`₦${tx.ngnValue?.toLocaleString() || "0"}`}
+                  ngnValue={`₦${tx.amount?.toLocaleString() || "0"}`}
                   timestamp={tx.timestamp}
                   transaction={tx}
                   onViewTransaction={onViewTransaction}

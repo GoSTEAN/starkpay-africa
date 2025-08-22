@@ -27,7 +27,21 @@ import useGetBalance from "@/hooks/useGetBalance";
 const MERCHANT_ADDRESS =
   "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
 
-export default function DashboardHome() {
+interface Transctions {
+  id: number;
+  currency: string;
+  status: string;
+  timestamp: Date | string;
+  // Add other properties that exist in your transaction objects
+  amount?: string;
+  category?: string;
+}
+
+interface DashboardProps {
+  transactions: Transctions[];
+}
+
+export default function DashboardHome({ transactions }: DashboardProps) {
   const { account, address } = useAccount();
   const { role, loading, error, isMerchant } = useUserRole();
   const [showModal, setShowModal] = useState(false);
@@ -49,6 +63,41 @@ export default function DashboardHome() {
     setActiveDration(dur);
   };
 
+  const filteredTransactions = transactions.filter((tx) => {
+    return tx.currency === "STRK" || 
+           tx.currency === "USDT" || 
+           tx.currency === "USDC" || 
+           tx.currency === "NGN";
+  });
+
+  const currencyFiltered = transactions.filter(tx => 
+    ["STRK", "USDT", "USDC", "NGN"].includes(tx.currency)
+  );
+
+  const removeDuplicates = (transactions: Transactions[]) => {
+  const uniqueTransactions = new Map<number, Transaction>();
+  
+  transactions.forEach(tx => {
+    const existingTx = uniqueTransactions.get(tx.id);
+    
+    // If we haven't seen this ID yet, or if this transaction is newer
+    if (!existingTx || new Date(tx.timestamp) > new Date(existingTx.timestamp)) {
+      uniqueTransactions.set(tx.id, tx);
+    }
+  });
+  
+  return Array.from(uniqueTransactions.values());
+};
+
+  // Remove duplicates, keeping the most recent
+  const uniqueTransactions = removeDuplicates(currencyFiltered);
+
+  // Sort by timestamp (newest first)
+  const sortedTransactions = [...uniqueTransactions].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
+ 
   const phoneNo = "1234567890";
   const accNo = "0234567890";
   const name = "Nanzing Moses Tali";
@@ -192,7 +241,7 @@ export default function DashboardHome() {
               USDT Balance
             </h1>
             <p className="text-[21px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-             {hideDetails ? (
+              {hideDetails ? (
                 <span className="text-wite text-2xl">----</span>
               ) : (
                 <span className="flex">
@@ -306,52 +355,78 @@ export default function DashboardHome() {
                   </tr>
                 </thead>
                 <tbody className="text-[#FBFBFB] font-[400px] gap-[24px] font-[Open Sans] text-[14px] lg:text-[16px] flex flex-col gap-[24px]  pb-[16px] w-full">
-                  {mockData?.map((td, id) => (
-                    <tr
-                      key={id}
-                      className="flex hover:bg-[#FBFBFB1A]/20 transition-all duration-300 items-center gap-[48px]  pb-[5] border-b border-[#FBFBFB1A] "
-                    >
-                      <td className="w-full flex truncate">
-                        <div className="flex overflow-x-scroll gap-[8px] items-center justify-center">
-                          <div className="w-[30px] flex-none flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
-                            {img ? (
-                              <Image
-                                src={img}
-                                fill
-                                alt="user profile image"
-                                className="rotate-[-45deg]"
+                  {sortedTransactions?.map(
+                    (
+                      td,
+                      id
+                    ) => (
+                      <tr
+                        key={id}
+                        className="flex hover:bg-[#FBFBFB1A]/20 transition-all duration-300 items-center gap-[48px]  pb-[5] border-b border-[#FBFBFB1A] "
+                      >
+                        <td className="w-full flex truncate">
+                          <div className="flex overflow-x-scroll gap-[8px] items-center justify-center">
+                            <div className="w-[30px] flex-none flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
+                              {img ? (
+                                <Image
+                                  src={img}
+                                  fill
+                                  alt="user profile image"
+                                  className="rotate-[-45deg]"
+                                />
+                              ) : (
+                                <User
+                                  color="white"
+                                  size={100}
+                                  className="rotate-[-45deg]"
+                                />
+                              )}
+                            </div>
+                            <h1 className="  text-center font-[400] text-[#FBFBFB] font-[Montserrat]">
+                              talinanzing111
+                            </h1>
+                          </div>
+                        </td>
+                        <td className="w-full lg:w-[30%] truncate">
+                          ${td.amount}
+                        </td>
+                        <td className="w-full lg:w-[30%] truncate"></td>
+                        <td className="w-full lg:w-[30%] truncate flex gap-[2px] p-[6px_14px] items-center text-start justify-center bg-[#FBFBFB12] rounded-[30px]">
+                          <span>
+                            {td.status === "pending" ? (
+                              <RotateCcw
+                                size={15}
+                                className=" hidden xl:flex text-xm "
                               />
                             ) : (
-                              <User
-                                color="white"
-                                size={100}
-                                className="rotate-[-45deg]"
-                              />
+                              ""
                             )}
-                          </div>
-                          <h1 className="  text-center font-[400] text-[#FBFBFB] font-[Montserrat]">
-                            {td.name}
-                          </h1>
-                        </div>
-                      </td>
-                      <td className="w-full lg:w-[30%] truncate">
-                        ${td.amount}
-                      </td>
-                      <td className="w-full lg:w-[30%] truncate">{td.date}</td>
-                      <td className="w-full lg:w-[30%] truncate flex gap-[6px] p-[6px_14px] items-center text-start justify-start bg-[#FBFBFB12] rounded-[30px]">
-                        <span>
-                          {td.status === "In progress" ? <RotateCcw /> : ""}
-                        </span>{" "}
-                        <span>
-                          {td.status === "Warning" ? <TriangleAlert /> : ""}
-                        </span>{" "}
-                        <span>
-                          {td.status === "Done" ? <CircleCheck /> : ""}
-                        </span>
-                        <span>{td.status}</span>
-                      </td>
-                    </tr>
-                  ))}
+                          </span>{" "}
+                          <span>
+                            {td.status === "failed" ? (
+                              <TriangleAlert
+                                size={15}
+                                className=" hidden xl:flex text-xm "
+                              />
+                            ) : (
+                              ""
+                            )}
+                          </span>{" "}
+                          <span>
+                            {td.status === "success" ? (
+                              <CircleCheck
+                                size={15}
+                                className=" hidden xl:flex text-xm "
+                              />
+                            ) : (
+                              ""
+                            )}
+                          </span>
+                          <span className="">{td.status}</span>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
