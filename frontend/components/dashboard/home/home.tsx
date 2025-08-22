@@ -19,22 +19,16 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useUserRole } from "@/hooks/getUserRole";
-import { Contract, RpcProvider } from "starknet";
-import BecomeAMerchant from "./become-a-marchant";
-import { STARKPAY_ABI as MERCHANT_ABI } from "@/hooks/useStarkpayContract";
 import useGetBalance from "@/hooks/useGetBalance";
-
-const MERCHANT_ADDRESS =
-  "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
 
 interface Transctions {
   id: number;
   currency: string;
   status: string;
   timestamp: Date | string;
-  // Add other properties that exist in your transaction objects
   amount?: string;
   category?: string;
+  type?: string;
 }
 
 interface DashboardProps {
@@ -64,30 +58,33 @@ export default function DashboardHome({ transactions }: DashboardProps) {
   };
 
   const filteredTransactions = transactions.filter((tx) => {
-    return tx.currency === "STRK" || 
-           tx.currency === "USDT" || 
-           tx.currency === "USDC" || 
-           tx.currency === "NGN";
+    return (
+      tx.currency === "STRK" ||
+      tx.currency === "USDT" ||
+      tx.currency === "USDC" ||
+      tx.currency === "NGN"
+    );
   });
 
-  const currencyFiltered = transactions.filter(tx => 
+  const currencyFiltered = transactions.filter((tx) =>
     ["STRK", "USDT", "USDC", "NGN"].includes(tx.currency)
   );
 
-  const removeDuplicates = (transactions: Transactions[]) => {
-  const uniqueTransactions = new Map<number, Transaction>();
-  
-  transactions.forEach(tx => {
-    const existingTx = uniqueTransactions.get(tx.id);
-    
-    // If we haven't seen this ID yet, or if this transaction is newer
-    if (!existingTx || new Date(tx.timestamp) > new Date(existingTx.timestamp)) {
-      uniqueTransactions.set(tx.id, tx);
-    }
-  });
-  
-  return Array.from(uniqueTransactions.values());
-};
+  const removeDuplicates = (transactions: Transctions[]) => {
+    const uniqueTransactions = new Map<number, Transctions>();
+
+    transactions.forEach((tx) => {
+      const existingTx = uniqueTransactions.get(tx.id);
+      if (
+        !existingTx ||
+        new Date(tx.timestamp) > new Date(existingTx.timestamp)
+      ) {
+        uniqueTransactions.set(tx.id, tx);
+      }
+    });
+
+    return Array.from(uniqueTransactions.values());
+  };
 
   // Remove duplicates, keeping the most recent
   const uniqueTransactions = removeDuplicates(currencyFiltered);
@@ -97,12 +94,8 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
- 
-  const phoneNo = "1234567890";
+  console.log(sortedTransactions);
   const accNo = "0234567890";
-  const name = "Nanzing Moses Tali";
-  const emailAddress = "talinanzing111@gmail.com";
-  const location = "No 4 Mozambique Barnawa Complex, Kaduna";
   const amount = "12,000,500";
   const img = "/user.jpg";
   const recentNames = [
@@ -115,63 +108,6 @@ export default function DashboardHome({ transactions }: DashboardProps) {
 
   const thead = ["Name", "Amount", "Date", "Status"];
   const duration = ["All", "Week", "Months"];
-
-  const mockData = [
-    {
-      name: "Progress Ada",
-      amount: 400,
-      date: "August 11, 2025",
-      status: "In progress",
-    },
-    {
-      name: "Chinedu Adebayo",
-      amount: 100,
-      date: "August 10, 2025",
-      status: "Warning",
-    },
-    {
-      name: "Osasogie Bello",
-      amount: 60,
-      date: "August 10, 2025",
-      status: "Done",
-    },
-    {
-      name: "Funmilayo Musa",
-      amount: 10,
-      date: "August 09, 2025",
-      status: "Done",
-    },
-    {
-      name: "Ayodeji Nwosu",
-      amount: 300,
-      date: "August 09, 2025",
-      status: "Warning",
-    },
-    {
-      name: "Zainab Ogunleye",
-      amount: 120,
-      date: "August 08, 2025",
-      status: "In progress",
-    },
-    {
-      name: "Babatunde Abdullahi",
-      amount: 1200,
-      date: "August 07, 2025",
-      status: "In progress",
-    },
-    {
-      name: "Amarachi Yusuf",
-      amount: 1100,
-      date: "August 06, 2025",
-      status: "Warning",
-    },
-    {
-      name: "Omotola Lawal",
-      amount: 40,
-      date: "August 05, 2025",
-      status: "Warning",
-    },
-  ];
 
   return (
     <section className="relative rounded-[19px] items-center py-[66px] w-full h-full  bg-[#212324] overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px]">
@@ -355,78 +291,73 @@ export default function DashboardHome({ transactions }: DashboardProps) {
                   </tr>
                 </thead>
                 <tbody className="text-[#FBFBFB] font-[400px] gap-[24px] font-[Open Sans] text-[14px] lg:text-[16px] flex flex-col gap-[24px]  pb-[16px] w-full">
-                  {sortedTransactions?.map(
-                    (
-                      td,
-                      id
-                    ) => (
-                      <tr
-                        key={id}
-                        className="flex hover:bg-[#FBFBFB1A]/20 transition-all duration-300 items-center gap-[48px]  pb-[5] border-b border-[#FBFBFB1A] "
-                      >
-                        <td className="w-full flex truncate">
-                          <div className="flex overflow-x-scroll gap-[8px] items-center justify-center">
-                            <div className="w-[30px] flex-none flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
-                              {img ? (
-                                <Image
-                                  src={img}
-                                  fill
-                                  alt="user profile image"
-                                  className="rotate-[-45deg]"
-                                />
-                              ) : (
-                                <User
-                                  color="white"
-                                  size={100}
-                                  className="rotate-[-45deg]"
-                                />
-                              )}
-                            </div>
-                            <h1 className="  text-center font-[400] text-[#FBFBFB] font-[Montserrat]">
-                              talinanzing111
-                            </h1>
+                  {sortedTransactions?.map((td, id) => (
+                    <tr
+                      key={id}
+                      className="flex hover:bg-[#FBFBFB1A]/20 transition-all duration-300 items-center gap-[48px]  pb-[5] border-b border-[#FBFBFB1A] "
+                    >
+                      <td className="w-full flex truncate">
+                        <div className="flex overflow-x-scroll gap-[8px] items-center justify-center">
+                          <div className="w-[30px] flex-none flex items-center justify-center h-[30px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
+                            {img ? (
+                              <Image
+                                src={img}
+                                fill
+                                alt="user profile image"
+                                className="rotate-[-45deg]"
+                              />
+                            ) : (
+                              <User
+                                color="white"
+                                size={100}
+                                className="rotate-[-45deg]"
+                              />
+                            )}
                           </div>
-                        </td>
-                        <td className="w-full lg:w-[30%] truncate">
-                          ${td.amount}
-                        </td>
-                        <td className="w-full lg:w-[30%] truncate"></td>
-                        <td className="w-full lg:w-[30%] truncate flex gap-[2px] p-[6px_14px] items-center text-start justify-center bg-[#FBFBFB12] rounded-[30px]">
-                          <span>
-                            {td.status === "pending" ? (
-                              <RotateCcw
-                                size={15}
-                                className=" hidden xl:flex text-xm "
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </span>{" "}
-                          <span>
-                            {td.status === "failed" ? (
-                              <TriangleAlert
-                                size={15}
-                                className=" hidden xl:flex text-xm "
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </span>{" "}
-                          <span>
-                            {td.status === "success" ? (
-                              <CircleCheck
-                                size={15}
-                                className=" hidden xl:flex text-xm "
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </span>
-                          <span className="">{td.status}</span>
-                        </td>
-                      </tr>
-                    )
-                  )}
+                          <h1 className="  text-center font-[400] text-[#FBFBFB] font-[Montserrat]">
+                            talinanzing111
+                          </h1>
+                        </div>
+                      </td>
+                      <td className="w-full lg:w-[30%] truncate">
+                        ${td.amount}
+                      </td>
+                      <td className="w-full lg:w-[30%] truncate"></td>
+                      <td className="w-full lg:w-[30%] truncate flex gap-[2px] p-[6px_14px] items-center text-start justify-center bg-[#FBFBFB12] rounded-[30px]">
+                        <span>
+                          {td.type === "pending" ? (
+                            <RotateCcw
+                              size={15}
+                              className=" hidden xl:flex text-xm "
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </span>{" "}
+                        <span>
+                          {td.type === "failed" ? (
+                            <TriangleAlert
+                              size={15}
+                              className=" hidden xl:flex text-xm "
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </span>{" "}
+                        <span>
+                          {td.type === "success" ? (
+                            <CircleCheck
+                              size={15}
+                              className=" hidden xl:flex text-xm "
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </span>
+                        <span className="">{td.type}</span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
