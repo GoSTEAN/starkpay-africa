@@ -87,6 +87,8 @@ npm install
 
 # Start frontend
 npm run dev
+
+0x0294e947294a9fb919226fb6b326986a4029cb07adc89ef6c97ea9c5755bb763
 ```
 
 ### Usage Flow
