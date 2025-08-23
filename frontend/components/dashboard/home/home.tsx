@@ -1,24 +1,15 @@
 import {
-  ChevronDown,
   ChevronRight,
   CircleCheck,
-  Copy,
   Eye,
   EyeClosed,
   Loader2,
-  LogOut,
-  PencilLine,
   RotateCcw,
-  Shield,
   TriangleAlert,
   User,
-  Verified,
-  Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
-import { useAccount } from "@starknet-react/core";
-import { useUserRole } from "@/hooks/getUserRole";
 import useGetBalance from "@/hooks/useGetBalance";
 
 
@@ -27,11 +18,6 @@ interface DashboardProps {
 }
 
 export default function DashboardHome({ transactions }: DashboardProps) {
-const { account, address } = useAccount();
-  // const { role, loading, error, isMerchant } = useUserRole();
-  const [showModal, setShowModal] = useState(false);
-  const [registerLoading, setRegisterLoading] = useState(false);
-  const [registerError, setRegisterError] = useState("");
   const [activeDuration, setActiveDration] = useState("Week");
   
     const {
@@ -49,16 +35,7 @@ const { account, address } = useAccount();
     setActiveDration(dur);
   };
 
-  const filteredTransactions = transactions.filter((tx) => {
-    return (
-      tx.currency === "STRK" ||
-      tx.currency === "USDT" ||
-      tx.currency === "USDC" ||
-      tx.currency === "NGN"
-    );
-  });
-
-
+ 
   const currencyFiltered = transactions.filter((tx) =>
     ["STRK", "USDT", "USDC", "NGN"].includes(tx.currency)
   );

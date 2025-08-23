@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   Copy,
+  Loader,
   LogOut,
   PencilLine,
   Shield,
@@ -36,12 +37,12 @@ export default function ProfilePage() {
     nodeUrl: url,
   });
 
-  // if (loading)
-  //   return (
-  //     <span className="px-3 z-10 py-1 text-lg bg-gray-100 text-white rounded-full animate-pulse">
-  //       Loading...
-  //     </span>
-  //   );
+  if (loading)
+    return (
+      <span className="px-3 z-10 py-1 w-full h-full flex justify-center items-center text-lg  animate-pulse">
+        <Loader color="white" className="animate-spin" size={50}/>
+      </span>
+    );
 
   if (error)
     return (
@@ -155,11 +156,9 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-[8px] pb-[24px]">
           <h1 className="text-[32px] font-[600] text-[#8F6DF5] font-[Montserrat]">
-            Profile
+            Info
           </h1>
-          <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
-            View all your details here.
-          </p>
+         
         </div>
         <div className="gap-[24px] bg-[linear-gradient(253.67deg,rgba(143,109,245,0.1)_18.27%,rgba(33,35,36,0.1)_91.93%)] flex flex-col  w-full lg:flex-row border border-[#FBFBFB1F] p-[23px] rounded-[19px] opacity-100">
           <div className="flex flex-col w-full gap-[24px] ">
