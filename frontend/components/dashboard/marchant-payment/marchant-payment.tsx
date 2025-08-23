@@ -8,7 +8,6 @@ import QRCodeLib from "qrcode";
 import QrCodeComponent from "./qr-code";
 import { useMemo } from "react";
 import useExchangeRates from "@/hooks/useExchangeRate";
-import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 import {
   useAccount,
   useContract,
@@ -19,11 +18,10 @@ import { STARKPAY_ABI as paymentAbi } from "@/hooks/useStarkpayContract";
 
 // Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {
-  USDT: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
-  USDC: tokenAddress.USDC,
-  STRK: tokenAddress.STRK,
+  USDT: "0x068f5c6a61730768477ced7eef7680a434a851905eeff58ee8ba2115ada38e3",
+  USDC: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+  STRK: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
 };
-
 
 // Token decimals for u256 conversion
 const TOKEN_DECIMALS: { [key: string]: number } = {
@@ -68,17 +66,9 @@ export default function MarchantPayment({
     "pending",
   ]);
 
-  const url = process.env.NEXT_PUBLIC_RPC_URL;
-  if(!url) return
   const provider = new RpcProvider({
-    
-    nodeUrl:url,
+    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
   });
-
-  console.log(tokenAddress.USDT)
-console.log(tokenAddress.STRK)
-console.log(tokenAddress.USDC)
-
 
   // Contract address
   let contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;

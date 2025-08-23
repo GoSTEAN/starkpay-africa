@@ -9,9 +9,9 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import useGetBalance from "@/hooks/useGetBalance";
-
+import useExchangeRates from "@/hooks/useExchangeRate";
 
 interface DashboardProps {
   transactions: any[];
@@ -20,13 +20,14 @@ interface DashboardProps {
 export default function DashboardHome({ transactions }: DashboardProps) {
   const [activeDuration, setActiveDration] = useState("Week");
   
-    const {
+  const {
     balances,
     loading: balanceLoading,
     error: balanceError,
     refetch,
   } = useGetBalance();
   const [hideDetails, setHideDetals] = useState(false);
+  const exchangeRates = useExchangeRates();
 
   const handleHideDetails = () => {
     setHideDetals(!hideDetails);
@@ -34,8 +35,53 @@ export default function DashboardHome({ transactions }: DashboardProps) {
   const handleDurationChange = (dur: string) => {
     setActiveDration(dur);
   };
+  
+  // Calculate total balance in Naira
+  const totalBalance = useMemo(() => {
+    if (balanceLoading || !exchangeRates.rates) return "0";
+    
+    let total = 0;
+    
+    // Calculate USDT balance in Naira
+    if (balances.USDT) {
+      const usdtAmount = Number.parseFloat(balances.USDT);
+      if (!isNaN(usdtAmount)) {
+        const rate = exchangeRates.rates.USDT;
+        if (rate) {
+          total += usdtAmount * Number(rate);
+        }
+      }
+    }
+    
+    // Calculate USDC balance in Naira
+    if (balances.USDC) {
+      const usdcAmount = Number.parseFloat(balances.USDC);
+      if (!isNaN(usdcAmount)) {
+        const rate = exchangeRates.rates.USDC;
+        if (rate) {
+          total += usdcAmount * Number(rate);
+        }
+      }
+    }
+    
+    // Calculate STRK balance in Naira
+    if (balances.STRK) {
+      const strkAmount = Number.parseFloat(balances.STRK);
+      if (!isNaN(strkAmount)) {
+        const rate = exchangeRates.rates.STRK;
+        if (rate) {
+          total += strkAmount * Number(rate);
+        }
+      }
+    }
+    
+    // Format the total with commas
+    return total.toLocaleString('en-NG', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2
+    });
+  }, [balances, exchangeRates, balanceLoading]);
 
- 
   const currencyFiltered = transactions.filter((tx) =>
     ["STRK", "USDT", "USDC", "NGN"].includes(tx.currency)
   );
@@ -53,7 +99,6 @@ export default function DashboardHome({ transactions }: DashboardProps) {
       }
     });
 
-
     return Array.from(uniqueTransactions.values());
   };
 
@@ -65,9 +110,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
-console.log(sortedTransactions);
   const accNo = "0234567890";
-  const amount = "12,000,500";
   const img = "/user.jpg";
   const recentNames = [
     "Peter Onoja",
@@ -80,7 +123,7 @@ console.log(sortedTransactions);
   const thead = ["Name", "Amount", "Date", "Status"];
   const duration = ["All", "Week", "Months"];
   
- return (
+  return (
     <section className="relative rounded-[19px] items-center py-[66px] w-full h-full  bg-[#212324] overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px]">
       <div className="w-full h-full flex flex-col gap-[32px]  overflow-y-scroll">
         <div className="flex flex-col gap-[8px] ">
@@ -106,8 +149,10 @@ console.log(sortedTransactions);
           <div className=" text-[20px] lg:text-[38px] text-white font-[600]">
             {hideDetails ? (
               <span className="text-wite text-2xl">******</span>
+            ) : balanceLoading ? (
+              <Loader2 color="white" className="animate-spin" size={30} />
             ) : (
-              <span>N {amount}</span>
+              <span>₦ {totalBalance}</span>
             )}
           </div>
 
@@ -187,7 +232,7 @@ console.log(sortedTransactions);
           </h1>
           <div className="flex justify-between gap-[24px] items-center">
             {recentNames?.map((name, id) => (
-              <div className="flex flex-col overflow-x-scroll items-center justify-center">
+              <div key={id} className="flex flex-col overflow-x-scroll items-center justify-center">
                 <div className="w-[50px] flex items-center justify-center h-[50px]  overflow-hidden relative rounded-full bg-transparent border-x-[3px] rotate-45 border-x-white shadow-[inset_0_0_11px_10px_rgba(50,50,50,0.4),inset_0_-1px_4px_rgba(255,255,255,0.1)]">
                   {img ? (
                     <Image
@@ -205,7 +250,6 @@ console.log(sortedTransactions);
                   )}
                 </div>
                 <h1
-                  key={id}
                   className="text-[14px] w-[50px] text-center font-[400] text-[#8F6DF5] font-[Montserrat]"
                 >
                   {name}
@@ -337,5 +381,4 @@ console.log(sortedTransactions);
       </div>
     </section>
   );
-
-  }
+}

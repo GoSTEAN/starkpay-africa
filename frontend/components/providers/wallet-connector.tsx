@@ -4,7 +4,6 @@ import { useAccount } from "@starknet-react/core";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ConnectButton from "./ConnectButton";
-import Register from "@/components/providers/Register";
 import { RpcProvider, Contract } from "starknet";
 import { STARKPAY_ABI } from "@/hooks/useStarkpayContract";
 
@@ -12,7 +11,6 @@ export default function ConnectWallet() {
   const { address, account } = useAccount();
   const pathname = usePathname();
   const router = useRouter();
-  const [showRegister, setShowRegister] = useState(false);
   const [contract, setContract] = useState<Contract | null>(null);
 
   // Contract configuration
@@ -30,7 +28,6 @@ export default function ConnectWallet() {
       setContract(contractInstance);
     } else {
       setContract(null);
-      setShowRegister(false);
     }
   }, [address]);
 
@@ -53,25 +50,19 @@ export default function ConnectWallet() {
     if (address && pathname !== "/dashboard") {
       router.push("/dashboard");
     }
-  }, [address, pathname, router, showRegister]);
+  }, [address, pathname, router]);
+
+  const handleConnectSuccess = () => {
+    // Redirect to dashboard after successful connection and registration
+    if (address && pathname !== "/dashboard") {
+      router.push("/dashboard");
+    }
+  };
 
   return (
-    <>
-      {showRegister && contract && (
-        <Register
-          onRegister={async (isMerchant: boolean) => {
-            setShowRegister(false);
-          }}
-          isRegistering={false}
-          contract={contract}
-          address={address}
-          account={account}
-        />
-      )}
-      <ConnectButton
-        onShowRegister={() => setShowRegister(true)}
-        contract={contract}
-      />
-    </>
+    <ConnectButton
+      contract={contract}
+      onConnectSuccess={handleConnectSuccess}
+    />
   );
 }

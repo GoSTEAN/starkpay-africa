@@ -5,13 +5,15 @@ import { StarknetkitConnector, useStarknetkitConnectModal } from "starknetkit";
 import { useRouter } from "next/navigation";
 import useNotifications from "@/components/providers/notification-provider";
 import { useAccount } from "@starknet-react/core";
+import { RpcProvider, Contract } from "starknet";
+import { STARKPAY_ABI } from "@/hooks/useStarkpayContract";
 
 interface ConnectButtonProps {
-  onShowRegister: () => void;
   contract: any;
+  onConnectSuccess: () => void;
 }
 
-export default function ConnectButton({ onShowRegister, contract }: ConnectButtonProps) {
+export default function ConnectButton({ contract, onConnectSuccess }: ConnectButtonProps) {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { starknetkitConnectModal } = useStarknetkitConnectModal({
@@ -20,6 +22,69 @@ export default function ConnectButton({ onShowRegister, contract }: ConnectButto
   const { address, account } = useAccount();
   const { addNotification } = useNotifications();
   const router = useRouter();
+
+  const registerAsMerchant = async () => {
+    if (!address || !contract || !account) return;
+    
+    try {
+      // Check if user is already registered
+      const isRegisteredCall = contract.populate("is_registered", [address]);
+      const isRegistered = await contract.is_registered(isRegisteredCall.calldata);
+      
+      if (isRegistered) {
+        // User is already registered, proceed to dashboard
+        onConnectSuccess();
+        return;
+      }
+      
+      // Register as merchant automatically
+      const call = contract.populate("register", [address, 1]); // 1 for merchant
+      const response = await account.execute(call);
+      
+      // Wait for transaction confirmation
+      const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+      if (!RPC_URL) throw new Error("RPC URL not configured");
+      
+      await new RpcProvider({ nodeUrl: RPC_URL }).waitForTransaction(
+        response.transaction_hash, 
+        {
+          retryInterval: 1000,
+          successStates: ["ACCEPTED_ON_L2"],
+        }
+      );
+      
+      addNotification({
+        id: Date.now(),
+        type: "success",
+        title: "Registered as Merchant",
+        message: "Your account has been automatically registered as a merchant",
+        timestamp: new Date(),
+        read: false,
+        category: "connection",
+        status: "completed",
+      });
+      
+      onConnectSuccess();
+      
+    } catch (err) {
+      console.error("Registration error:", err);
+      const errorMessage = (err as Error).message || "Automatic registration failed";
+      
+      addNotification({
+        id: Date.now(),
+        type: "error",
+        title: "Registration Failed",
+        message: errorMessage,
+        timestamp: new Date(),
+        read: false,
+        category: "connection",
+        status: "failed",
+      });
+      
+      // Still allow connection even if registration fails
+      onConnectSuccess();
+    }
+  };
 
   const connectWallet = async () => {
     try {
@@ -38,8 +103,11 @@ export default function ConnectButton({ onShowRegister, contract }: ConnectButto
         status: "completed",
       });
 
-      // Redirect to dashboard after successful connection
-      // router.push("/dashboard");
+      // Automatically register as merchant after connection
+      if (contract && address) {
+        await registerAsMerchant();
+      }
+      
     } catch (err) {
       const errorMessage = (err as Error).message || "Failed to connect wallet";
       addNotification({
