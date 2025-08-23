@@ -31,7 +31,7 @@ export default function ConnectWallet() {
     }
   }, [address]);
 
-  // Handle routing based on connection state
+  //Handle routing based on connection state
   useEffect(() => {
     // Don't do any redirects for /pay route
     if (pathname === "/pay") {

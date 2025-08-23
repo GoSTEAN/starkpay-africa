@@ -25,8 +25,11 @@ export default function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
-
+  
   const MERCHANT_ADDRESS =process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  
+  console.log("Account XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", account)
+    console.log("Account XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",address)
 
   if(!MERCHANT_ADDRESS) {
     console.log("failed to fetc machant address")
@@ -35,7 +38,7 @@ export default function ProfilePage() {
   
   const url = process.env.NEXT_PUBLIC_RPC_URL;
   if(!url) return
-
+  
   const provider = new RpcProvider({
     nodeUrl: url,
   });
@@ -71,7 +74,8 @@ export default function ProfilePage() {
     try {
       const contract = new Contract(MERCHANT_ABI, MERCHANT_ADDRESS, provider);
       if (account) {
-        contract.connect(account);
+        // contract.connect(account);
+        // const 
       } else {
         setRegisterError("No account found. Please connect your wallet.");
         setRegisterLoading(false);
