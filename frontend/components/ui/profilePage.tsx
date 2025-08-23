@@ -26,9 +26,12 @@ export default function ProfilePage() {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
 
-  const MERCHANT_ADDRESS =
-  "0x01f7d31c6f11046029310be2e7810189eb6b4581049b4d35047fbc8e42ab75a4";
+  const MERCHANT_ADDRESS =process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
+  if(!MERCHANT_ADDRESS) {
+    console.log("failed to fetc machant address")
+    return
+  }
   
   const url = process.env.NEXT_PUBLIC_RPC_URL;
   if(!url) return
