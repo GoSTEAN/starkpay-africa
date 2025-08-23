@@ -59,10 +59,10 @@ export default function Dashboard() {
       icon: <History size={25} color="white" className="stroke-3" />,
       name: "Transactions",
     },
-     {
-      icon: <Settings size={25} color="white" className="stroke-3" />,
-      name: "Settings",
-    },
+    //  {
+    //   icon: <Settings size={25} color="white" className="stroke-3" />,
+    //   name: "Settings",
+    // },
      {
       icon: <LogOut size={25} color="white" className="stroke-3" />,
       name: "Log Out",

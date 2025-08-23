@@ -127,9 +127,15 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     <section className="relative rounded-[19px] items-center py-[66px] w-full h-full  bg-[#212324] overflow-y-scroll gap-[22px] flex flex-col font-[Montserrat] px-[32px]">
       <div className="w-full h-full flex flex-col gap-[32px]  overflow-y-scroll">
         <div className="flex flex-col gap-[8px] ">
-          <h1 className="text-[32px] font-[600] text-[#8F6DF5] font-[Montserrat]">
+          {/* <Image
+              src={'/Swift logo.svg'}
+              alt="swift logo"
+              width={100}
+              height={100}
+          /> */}
+          {/* <h1 className="text-[32px] font-[600] text-[#8F6DF5] font-[Montserrat]">
             Dashboard
-          </h1>
+          </h1> */}
           <p className="text-[16px] font-[400] font-[Open Sans] text-[#FBFBFB]">
             View all your details here.
           </p>
@@ -382,3 +388,4 @@ export default function DashboardHome({ transactions }: DashboardProps) {
     </section>
   );
 }
+

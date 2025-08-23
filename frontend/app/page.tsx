@@ -52,6 +52,32 @@ export default function Home() {
       <Values />
       <WhyStarkpay />
       <Faq />
+
+            {/* Hero Section */}
+      <section id="home">
+        <HeroSection />
+      </section>
+
+      {/* Features Section */}
+      <section id="features">
+        <Features />
+      </section>
+
+      {/* Values Section */}
+      <section id="values">
+        <Values />
+      </section>
+
+      {/* Why Starkpay Section */}
+      <section id="why-starkpay">
+        <WhyStarkpay />
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq">
+        <Faq />
+      </section>
+
       </div>
     </div>
   );

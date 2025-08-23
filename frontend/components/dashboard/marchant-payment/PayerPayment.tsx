@@ -6,7 +6,9 @@ import { RpcProvider, Contract } from "starknet";
 import { useSearchParams } from "next/navigation";
 import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
 import { STARKPAY_ABI as ERC20_ABI } from "@/hooks/useStarkpayContract";
+// import { Html5QrcodeScanner } from "html5-qrcode";
 import { Html5QrcodeScanner } from "html5-qrcode/cjs/html5-qrcode-scanner.js";
+
 
 // Token contract addresses
 const TOKEN_ADDRESSES: { [key: string]: string } = {

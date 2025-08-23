@@ -6,6 +6,7 @@ import { ChevronDown, QrCode, Eye, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import QRCodeLib from "qrcode";
 import QrCodeComponent from "./qr-code";
+// import 
 import { useMemo } from "react";
 import useExchangeRates from "@/hooks/useExchangeRate";
 import { TOKEN_ADDRESSES as tokenAddress } from "autoswap-sdk";
