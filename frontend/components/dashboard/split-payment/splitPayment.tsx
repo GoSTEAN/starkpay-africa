@@ -55,6 +55,8 @@ export default function SplitPayment() {
 
   const { address: connectedAddress } = useAccount();
 
+  console.log(tokenAddress.STRK)
+  console.log(tokenAddress.USDC)
   // Contract address
   let smeContractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
