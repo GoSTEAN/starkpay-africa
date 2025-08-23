@@ -41,7 +41,7 @@ const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
 
   return (
     <StarknetConfig
-      chains={[mainnet, sepolia]}
+      chains={[mainnet]}
       provider={publicProvider()}
       connectors={connectors as Connector[]}
       explorer={voyager}

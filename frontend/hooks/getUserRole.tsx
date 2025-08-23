@@ -12,7 +12,7 @@ export function useUserRole() {
   const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
   const RPC_URL =
     process.env.NEXT_PUBLIC_RPC_URL ||
-    "https://starknet-sepolia.public.blastapi.io";
+    "https://starknet-mainnet.public.blastapi.io";
 
   const checkUserRole = async () => {
     if (!address || !contractAddress) {
