@@ -33,13 +33,13 @@ const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
     new InjectedConnector({
       options: { id: "braavos", name: "Braavos" },
     }),
-    // new WebWalletConnector({ url: "https://web.argent.xyz" }),
-    // ArgentMobileConnector.init({
-    //   options: {
-    //     dappName: "Swift",
-    //     url: "https://swift-whls.vercel.app/",
-    //   },
-    // }),
+    new WebWalletConnector({ url: "https://web.argent.xyz" }),
+    ArgentMobileConnector.init({
+      options: {
+        dappName: "Swift",
+        url: "https://swift-flame.vercel.app/",
+      },
+    }),
   ];
 
   return (
