@@ -29,8 +29,8 @@ Swift solves these challenges by providing:
 
 * **Payments in USDC, USDT, and STRK**.
 * **Automatic revenue splitting** among 3–5 recipients.
-* **AutoSwappr-powered swaps** for instant token conversions.
-* **Naira withdrawals** using Nigerian fintech APIs (e.g., Flutterwave).
+* **AutoSwappr** for instant token conversions.
+* **Naira withdrawals** using Nigerian Bitnob APIs.
 * **On-chain verification** of all transactions.
 
 
@@ -39,10 +39,10 @@ Swift solves these challenges by providing:
 **Tech Stack**
 
 * **Smart Contracts**: Cairo on **Starknet**.
-* **Frontend**: ReactJS (merchant & customer UI).
+* **Frontend**: NextJS (merchant).
 * **Wallets**: Argent & Braavos.
 * **Swap Integration**: AutoSwappr.
-* **Naira Withdrawal**: Flutterwave API.
+* **Naira Withdrawal**: Bitnob API.
 * **Design**: Figma.
 * **Explorer**: Voyager.
 
@@ -54,7 +54,7 @@ Swift solves these challenges by providing:
 4. Optionally:
 
    * Swap tokens via **AutoSwappr**.
-   * Withdraw to **Naira** using fintech APIs.
+   * Withdraw to **Naira** using Bitnob APIs.
 5. Events emitted:
 
    * `PaymentReceived`
@@ -88,8 +88,10 @@ npm install
 # Start frontend
 npm run dev
 
-0x0294e947294a9fb919226fb6b326986a4029cb07adc89ef6c97ea9c5755bb763
 ```
+
+### Contract Address (Mainnet)
+0x0294e947294a9fb919226fb6b326986a4029cb07adc89ef6c97ea9c5755bb763
 
 ### Usage Flow
 
@@ -100,7 +102,7 @@ npm run dev
 
    * **Split** among recipients.
    * Optionally **swapped** using AutoSwappr.
-   * Optionally **withdrawn** into NGN via fintech API.
+   * Optionally **withdrawn** into NGN via Bitnob API.
 5. Merchant dashboard updates in real-time with confirmations & Tx hashes.
 
  **[Demo Video](#)** | **[Live Demo](#)** | **[Smart Contracts Repo](#)**
@@ -119,14 +121,6 @@ npm run dev
 * **Freelancers**: Accept stablecoins, swap for preferred tokens, or withdraw to bank accounts.
 
 
-## Challenges & Learnings
-
-* Wallet integration (Argent & Braavos) required handling edge cases.
-* Debugging **swap flows** with AutoSwappr on testnet.
-* Time pressure balancing **deployment speed vs. contract security**.
-* Learned how SMEs prioritize **ease of use, local currency access, and trust**.
-
-
 ## Future Roadmap
 
 * Expand stablecoin & token support for swaps.
@@ -137,9 +131,9 @@ npm run dev
 
 ## 👥 Team Contributions
 
-* **Stephanie Nwankwo** – Smart Contract Developer
+* **Stephanie Nwankwo** – Smart Contract Developer  (Cairo)
 * **Divine** – UI/UX Designer (Figma)
-* **Moses** – Frontend Developer (ReactJS)
+* **Moses** – Frontend Developer (NextJS)
 
 ## References
 
@@ -157,5 +151,5 @@ MIT License
 
 ## Contact
 
-* **Telegram**: [Join Chat](#)
+* **Telegram**: [Join Chat](t.me/swiftafrica)
 * **Twitter (X)**: [@\_swift](https://x.com/_swift)

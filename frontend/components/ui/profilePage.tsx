@@ -372,17 +372,18 @@ export default function ProfilePage() {
                 Account Type
               </h1>
               <p className="text-[16px] font-[400] font-[Open Sans] flex justify-between items-center text-[#FBFBFB]/50">
-                <span>{isMerchant ? "Merchant" : "User"}</span>
-                {!isMerchant && (
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(true)}
-                    className="cursor-pointer bg-[#5f3ec5] text-white/80 p-[8px] rounded-md hover:bg-[#5f3ec5]/80"
-                    disabled={registerLoading}
-                  >
-                    {registerLoading ? "Registering..." : "Become a Merchant"}
-                  </button>
-                )}
+                <span>{isMerchant ? "Merchant" : "Merchant"}</span>
+                {/* {!isMerchant && (
+                  // <button
+                  //   type="button"
+                  //   onClick={() => setShowModal(true)}
+                  //   className="cursor-pointer bg-[#5f3ec5] text-white/80 p-[8px] rounded-md hover:bg-[#5f3ec5]/80"
+                  //   disabled={registerLoading}
+                  // >
+                  //   {registerLoading ? "Registering..." : "Become a Merchant"}
+                  // </button>
+                //)
+                } */}
               </p>
             </div>
           </div>
