@@ -45,7 +45,7 @@ const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
     ArgentMobileConnector.init({
       options: {
         dappName: "Swift",
-        url: "https://web.argent.xyz",
+        url: "https://swift-whls.vercel.app/",
       },
     }),
   ];
