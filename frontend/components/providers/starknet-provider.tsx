@@ -17,12 +17,11 @@ const chains = [mainnet];
 
 const connectors = [
   new InjectedConnector({
-    options: { id: "argentX", name: "Ready Wallet (formerly Argent)" },
-  }),
-  new InjectedConnector({
-    options: { id: "braavos", name: "Braavos" },
-  })
-
+      options: { id: "argentX", name: "Argent X" },
+    }),
+    new InjectedConnector({
+      options: { id: "braavos", name: "Braavos" },
+    }),
 ]
 
 const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
@@ -33,11 +32,12 @@ const StarknetProvider: React.FC<StarknetProviderProps> = ({ children }) => {
     new InjectedConnector({
       options: { id: "braavos", name: "Braavos" },
     }),
+    
     new WebWalletConnector({ url: "https://web.argent.xyz" }),
     ArgentMobileConnector.init({
       options: {
         dappName: "Swift",
-        url: "https://swift-flame.vercel.app/",
+        url: "https://swift-whls.vercel.app/",
       },
     }),
   ];
